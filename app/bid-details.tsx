@@ -20,6 +20,7 @@ import {
   XCircle,
   Clock,
   Award,
+  MessageCircle,
 } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
@@ -334,6 +335,16 @@ function SubmissionCard({
   canAward: boolean;
   onAward: () => void;
 }) {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleSendMessage = () => {
+    router.push({ 
+      pathname: "/messages", 
+      params: { userId: submission.contractorId } 
+    } as any);
+  };
+
   return (
     <View style={styles.submissionCard}>
       <View style={styles.submissionHeader}>
@@ -379,15 +390,24 @@ function SubmissionCard({
         </Text>
       </View>
 
-      {canAward && (
+      <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={styles.awardButton}
-          onPress={onAward}
+          style={styles.messageButton}
+          onPress={handleSendMessage}
         >
-          <Award size={18} color={Colors.white} />
-          <Text style={styles.awardButtonText}>Award Bid</Text>
+          <MessageCircle size={18} color={Colors.primary} />
+          <Text style={styles.messageButtonText}>Send Message</Text>
         </TouchableOpacity>
-      )}
+        {canAward && (
+          <TouchableOpacity
+            style={styles.awardButton}
+            onPress={onAward}
+          >
+            <Award size={18} color={Colors.white} />
+            <Text style={styles.awardButtonText}>Award Bid</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -734,7 +754,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.textTertiary,
   },
+  actionButtons: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 12,
+  },
+  messageButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  messageButtonText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.primary,
+  },
   awardButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -742,7 +785,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success,
     borderRadius: 12,
     paddingVertical: 12,
-    marginTop: 12,
   },
   awardButtonText: {
     fontSize: 15,
