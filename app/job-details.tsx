@@ -352,8 +352,10 @@ export default function JobDetailsScreen() {
                       )
                     }
                     onMessage={() => {
-                      setSelectedApplication(application);
-                      setShowMessageModal(true);
+                      router.push({ 
+                        pathname: "/messages", 
+                        params: { userId: application.applicantId } 
+                      } as any);
                     }}
                   />
                 ))}
