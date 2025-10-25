@@ -26,6 +26,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 import { useBids } from "@/contexts/BidsContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProjects } from "@/contexts/ProjectsContext";
 import { BidSubmission, BidStatus } from "@/types";
 
 export default function BidDetailsScreen() {
@@ -33,6 +34,7 @@ export default function BidDetailsScreen() {
   const router = useRouter();
   const { user, hasPermission } = useAuth();
   const { getBidById, getSubmissionsByBidId, hasUserSubmitted, awardBid, declineBid } = useBids();
+  const { getUserProjects } = useProjects();
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"details" | "submissions">("details");
 
@@ -40,6 +42,9 @@ export default function BidDetailsScreen() {
   const bid = getBidById(bidId as string);
   const submissions = getSubmissionsByBidId(bidId as string);
   const userSubmitted = user ? hasUserSubmitted(bidId as string, user.id) : false;
+  const userProjects = getUserProjects();
+  const awardedProject = bid ? userProjects.find(p => p.bidId === bid.id) : null;
+  const awardedSubmission = bid?.status === "awarded" ? submissions.find(s => s.contractorId === awardedProject?.contractorId) : null;
 
   const canViewAllBids = hasPermission("canViewAllBids");
   const isContractor = user?.role === "Subcontractor" || user?.role === "Trade Specialist" || user?.role === "GC";
@@ -258,7 +263,42 @@ export default function BidDetailsScreen() {
               </View>
             </View>
 
-            {canViewAllBids && (
+            {bid.status === "awarded" && awardedSubmission && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Awarded To</Text>
+                <View style={styles.awardedCard}>
+                  <View style={styles.awardedHeader}>
+                    <View>
+                      <Text style={styles.awardedContractor}>{awardedSubmission.contractorName}</Text>
+                      <Text style={styles.awardedCompany}>{awardedSubmission.contractorCompany}</Text>
+                    </View>
+                    <View style={styles.awardedAmount}>
+                      <Text style={styles.awardedAmountLabel}>Award Amount</Text>
+                      <Text style={styles.awardedAmountValue}>${awardedSubmission.amount.toLocaleString()}</Text>
+                    </View>
+                  </View>
+                  {awardedProject ? (
+                    <TouchableOpacity
+                      style={styles.viewProjectButton}
+                      onPress={() => router.push({ pathname: "/project-dashboard", params: { id: awardedProject.id } } as any)}
+                    >
+                      <FileText size={18} color={Colors.white} />
+                      <Text style={styles.viewProjectButtonText}>View Project Dashboard</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.setupProjectButton}
+                      onPress={() => router.push({ pathname: "/project-setup", params: { bidId: bid.id, submissionId: awardedSubmission.id } } as any)}
+                    >
+                      <FileText size={18} color={Colors.primary} />
+                      <Text style={styles.setupProjectButtonText}>Setup Project</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
+
+            {canViewAllBids && bid.status !== "awarded" && bid.status !== "declined" && (
               <View style={styles.section}>
                 <TouchableOpacity
                   style={styles.declineButton}
@@ -288,6 +328,7 @@ export default function BidDetailsScreen() {
                   key={submission.id} 
                   submission={submission} 
                   canAward={canViewAllBids && bid.status !== "awarded"}
+                  isAwarded={bid.status === "awarded" && submission.id === awardedSubmission?.id}
                   onAward={() => handleAwardBid(submission.id, submission.contractorName)}
                 />
               ))
@@ -329,10 +370,12 @@ export default function BidDetailsScreen() {
 function SubmissionCard({ 
   submission, 
   canAward, 
+  isAwarded,
   onAward 
 }: { 
   submission: BidSubmission;
   canAward: boolean;
+  isAwarded?: boolean;
   onAward: () => void;
 }) {
   const router = useRouter();
@@ -346,7 +389,7 @@ function SubmissionCard({
   };
 
   return (
-    <View style={styles.submissionCard}>
+    <View style={[styles.submissionCard, isAwarded && styles.submissionCardAwarded]}>
       <View style={styles.submissionHeader}>
         <View style={styles.submissionInfo}>
           <Text style={styles.submissionContractor}>
@@ -390,6 +433,13 @@ function SubmissionCard({
         </Text>
       </View>
 
+      {isAwarded && (
+        <View style={styles.awardedBanner}>
+          <Award size={20} color={Colors.success} />
+          <Text style={styles.awardedBannerText}>Awarded Bid</Text>
+        </View>
+      )}
+      
       <View style={styles.actionButtons}>
         <TouchableOpacity
           style={styles.messageButton}
@@ -945,5 +995,90 @@ const styles = StyleSheet.create({
   },
   submitButtonDisabled: {
     opacity: 0.5,
+  },
+  awardedCard: {
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: Colors.success,
+  },
+  awardedHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    gap: 16,
+  },
+  awardedContractor: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  awardedCompany: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  awardedAmount: {
+    alignItems: "flex-end",
+  },
+  awardedAmountLabel: {
+    fontSize: 12,
+    color: Colors.textTertiary,
+    marginBottom: 4,
+  },
+  awardedAmountValue: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.success,
+  },
+  viewProjectButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 14,
+  },
+  viewProjectButtonText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.white,
+  },
+  setupProjectButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingVertical: 14,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  setupProjectButtonText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.primary,
+  },
+  submissionCardAwarded: {
+    borderColor: Colors.success,
+    borderWidth: 2,
+  },
+  awardedBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.success + "20",
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  awardedBannerText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: Colors.success,
   },
 });
