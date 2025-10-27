@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   MessageCircle,
   Send,
@@ -22,6 +22,7 @@ import {
 import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useJobs } from "@/contexts/JobsContext";
+import { TEST_USERS } from "@/mocks/test-users";
 
 type ConversationPreview = {
   id: string;
@@ -35,6 +36,7 @@ type ConversationPreview = {
 
 export default function MessagesScreen() {
   const params = useLocalSearchParams();
+  const router = useRouter();
   const { user } = useAuth();
   const { messages, getJobById, sendMessage, markMessageAsRead } = useJobs();
   const [searchQuery, setSearchQuery] = useState("");
@@ -143,10 +145,17 @@ export default function MessagesScreen() {
 
   useEffect(() => {
     if (params.userId && user) {
-      const conversationId = [user.id, params.userId].sort().join("-");
+      const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
+      const conversationId = [user.id, userId].sort().join("-");
       const conversation = conversations.find(c => c.id === conversationId);
+      
       if (conversation) {
         handleSelectConversation(conversationId);
+      } else {
+        const recipientUser = TEST_USERS.find(u => u.id === userId);
+        if (recipientUser) {
+          handleSelectConversation(conversationId);
+        }
       }
     }
   }, [params.userId, user, conversations, handleSelectConversation]);
@@ -257,9 +266,25 @@ export default function MessagesScreen() {
           >
             <View style={styles.chatHeader}>
               <Text style={styles.chatTitle}>
-                {conversations.find((c) => c.id === selectedConversation)?.otherUserName}
+                {(() => {
+                  const conv = conversations.find((c) => c.id === selectedConversation);
+                  if (conv) return conv.otherUserName;
+                  
+                  if (params.userId && selectedConversation) {
+                    const [userId1, userId2] = selectedConversation.split("-");
+                    const otherUserId = userId1 === user?.id ? userId2 : userId1;
+                    const recipientUser = TEST_USERS.find(u => u.id === otherUserId);
+                    return recipientUser?.name || "Unknown User";
+                  }
+                  return "Chat";
+                })()}
               </Text>
-              <TouchableOpacity onPress={() => setSelectedConversation(null)}>
+              <TouchableOpacity onPress={() => {
+                setSelectedConversation(null);
+                if (params.userId) {
+                  router.back();
+                }
+              }}>
                 <X size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
