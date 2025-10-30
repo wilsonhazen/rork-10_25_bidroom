@@ -7,6 +7,8 @@ import { Stack, useRouter } from "expo-router";
 import { Calendar, FileText, TrendingUp, Users } from "lucide-react-native";
 import React, { useMemo } from "react";
 import NotificationBell from "@/components/NotificationBell";
+import OwnerDashboard from "@/components/dashboards/OwnerDashboard";
+import ContractorDashboard from "@/components/dashboards/ContractorDashboard";
 import {
   ScrollView,
   StyleSheet,
@@ -114,6 +116,50 @@ export default function HomeScreen() {
       upcomingCount,
     };
   }, [jobs, appointments]);
+
+  if (user?.role === "Project Manager" || user?.role === "Admin") {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            headerTitle: "Dashboard",
+            headerStyle: {
+              backgroundColor: Colors.surface,
+            },
+            headerTitleStyle: {
+              color: Colors.text,
+              fontWeight: "700" as const,
+            },
+            headerRight: () => <NotificationBell />,
+          }}
+        />
+        <OwnerDashboard />
+      </View>
+    );
+  }
+
+  if (user?.role === "GC" || user?.role === "Subcontractor" || user?.role === "Trade Specialist") {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            headerTitle: "Dashboard",
+            headerStyle: {
+              backgroundColor: Colors.surface,
+            },
+            headerTitleStyle: {
+              color: Colors.text,
+              fontWeight: "700" as const,
+            },
+            headerRight: () => <NotificationBell />,
+          }}
+        />
+        <ContractorDashboard />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
