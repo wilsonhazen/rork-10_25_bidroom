@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import {
   FileText,
@@ -33,6 +34,7 @@ export default function ProjectSetupScreen() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
+  const [contractNotes, setContractNotes] = useState("");
 
   const [projectData, setProjectData] = useState({
     title: "",
@@ -66,6 +68,49 @@ Budget: ${bid.budget || submission.amount}
 Contractor: ${submission.contractorName} from ${submission.contractorCompany}
 Owner: ${user.name} from ${user.company}
 Contractor Notes: ${submission.notes}
+Owner Additional Notes: ${contractNotes || "None provided"}
+Project Location: California
+
+IMPORTANT: This contract must comply with California contractor law. Include the following provisions:
+
+1. California Contractors State License Board (CSLB) Requirements:
+   - Contractor license number must be displayed on all contracts
+   - Notice to owner about contractor license verification at www.cslb.ca.gov
+   - Three-day right to cancel notice (California Business & Professions Code § 7159)
+
+2. California Payment Requirements (Civil Code § 8800):
+   - Progress payment schedule must be clearly defined
+   - Joint control provisions if applicable
+   - Notice of right to file mechanics lien
+   - Preliminary notice requirements
+
+3. California Contract Requirements (Business & Professions Code § 7159):
+   - Contract must be in writing for work over $500
+   - Must include approximate start and completion dates
+   - Must describe work to be performed
+   - Must include total price and payment terms
+   - Must contain notice of right to cancel
+   - Must include contractor license number
+
+4. Owner Protection Requirements:
+   - Contractor must provide proof of workers' compensation insurance
+   - Contractor must provide proof of general liability insurance ($1M minimum)
+   - Right to demand lien releases before payments
+   - Warranty provisions (minimum 1 year on workmanship)
+   - Arbitration clause per California arbitration rules
+
+5. Contractor Protection Requirements:
+   - Payment schedule tied to milestone completion
+   - Owner's obligation to provide site access
+   - Change order procedures
+   - Force majeure provisions
+   - Dispute resolution procedures
+
+6. Mandatory Disclosures:
+   - Mechanics lien warning per Civil Code § 8118
+   - Notice that contractor is required to be licensed and insured
+   - Information about how to verify contractor's license
+   - Notice of right to file complaint with CSLB
 
 Please generate the following in JSON format:
 
@@ -129,7 +174,9 @@ Please generate the following in JSON format:
   ]
 }
 
-Make it detailed, professional, and legally sound with standard AIA construction contract terms.`;
+Make it detailed, professional, and legally sound with standard AIA construction contract terms adapted for California law.
+
+Include all California-specific disclosures and notices required by law. Ensure warranty terms comply with California Civil Code requirements. Include arbitration provisions compliant with California Code of Civil Procedure.`;
 
       const response = await generateText(prompt);
       
@@ -328,10 +375,29 @@ Make it detailed, professional, and legally sound with standard AIA construction
                   <View style={styles.featureList}>
                     <Text style={styles.featureItem}>• Detailed scope of work</Text>
                     <Text style={styles.featureItem}>• Payment milestones</Text>
-                    <Text style={styles.featureItem}>• Legal protections</Text>
+                    <Text style={styles.featureItem}>• California contractor law protections</Text>
                     <Text style={styles.featureItem}>• Timeline & deliverables</Text>
+                    <Text style={styles.featureItem}>• Owner & contractor legal safeguards</Text>
                   </View>
                 </View>
+              </View>
+
+              <View style={styles.notesCard}>
+                <Text style={styles.notesLabel}>Additional Notes (Optional)</Text>
+                <Text style={styles.notesHelperText}>
+                  Provide any additional details to help AI create a better contract
+                  (e.g., special requirements, specific materials, timeline considerations)
+                </Text>
+                <TextInput
+                  style={styles.notesInput}
+                  placeholder="Enter notes here to improve AI-generated contract..."
+                  placeholderTextColor={Colors.textTertiary}
+                  value={contractNotes}
+                  onChangeText={setContractNotes}
+                  multiline
+                  numberOfLines={6}
+                  textAlignVertical="top"
+                />
               </View>
             </View>
 
@@ -769,5 +835,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textSecondary,
     textAlign: "center" as const,
+  },
+  notesCard: {
+    backgroundColor: Colors.surface,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: 12,
+  },
+  notesLabel: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  notesHelperText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  notesInput: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+    color: Colors.text,
+    minHeight: 120,
   },
 });
