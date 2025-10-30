@@ -3,6 +3,7 @@ import { JobsProvider } from "@/contexts/JobsContext";
 import { AppointmentsProvider } from "@/contexts/AppointmentsContext";
 import { BidsProvider } from "@/contexts/BidsContext";
 import { ProjectsProvider } from "@/contexts/ProjectsContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useSegments, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -72,17 +73,19 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <JobsProvider>
-          <AppointmentsProvider>
-            <BidsProvider>
-              <ProjectsProvider>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <RootLayoutNav />
-                </GestureHandlerRootView>
-              </ProjectsProvider>
-            </BidsProvider>
-          </AppointmentsProvider>
-        </JobsProvider>
+        <NotificationsProvider>
+          <JobsProvider>
+            <AppointmentsProvider>
+              <BidsProvider>
+                <ProjectsProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </ProjectsProvider>
+              </BidsProvider>
+            </AppointmentsProvider>
+          </JobsProvider>
+        </NotificationsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

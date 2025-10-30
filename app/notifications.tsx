@@ -17,17 +17,23 @@ import {
   Calendar,
   AlertCircle,
   Briefcase,
+  DollarSign,
+  AlertTriangle,
+  FileCheck,
+  Users,
+  Clock,
 } from "lucide-react-native";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
-import { useJobs } from "@/contexts/JobsContext";
-import { JobNotification } from "@/types";
+import { useNotifications, Notification, NotificationType } from "@/contexts/NotificationsContext";
 
-const getNotificationIcon = (type: JobNotification["type"]) => {
+const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
     case "new_job":
+    case "job_updated":
+    case "job_cancelled":
       return <Briefcase size={20} color={Colors.info} />;
     case "new_application":
+    case "application_withdrawn":
       return <FileText size={20} color={Colors.primary} />;
     case "application_accepted":
       return <CheckCircle size={20} color={Colors.success} />;
@@ -39,62 +45,117 @@ const getNotificationIcon = (type: JobNotification["type"]) => {
     case "estimate_confirmed":
     case "estimate_reminder":
     case "estimate_completed":
+    case "estimate_cancelled":
+    case "appointment_scheduled":
+    case "appointment_confirmed":
+    case "appointment_reminder":
+    case "appointment_cancelled":
+    case "appointment_rescheduled":
       return <Calendar size={20} color={Colors.warning} />;
-    case "job_updated":
-    case "job_cancelled":
-      return <AlertCircle size={20} color={Colors.textSecondary} />;
+    case "bid_invitation":
+    case "bid_submitted":
+    case "bid_accepted":
+    case "bid_rejected":
+    case "bid_updated":
+      return <FileCheck size={20} color={Colors.info} />;
+    case "project_created":
+    case "project_started":
+    case "project_completed":
+      return <Briefcase size={20} color={Colors.success} />;
+    case "milestone_created":
+    case "milestone_submitted":
+    case "milestone_approved":
+    case "milestone_rejected":
+    case "milestone_payment_released":
+      return <CheckCircle size={20} color={Colors.primary} />;
+    case "payment_received":
+    case "payment_sent":
+    case "payment_failed":
+    case "escrow_deposited":
+    case "escrow_released":
+      return <DollarSign size={20} color={Colors.success} />;
+    case "change_order_requested":
+    case "change_order_approved":
+    case "change_order_rejected":
+      return <FileText size={20} color={Colors.warning} />;
+    case "dispute_filed":
+    case "dispute_resolved":
+    case "dispute_escalated":
+      return <AlertTriangle size={20} color={Colors.error} />;
+    case "progress_update_posted":
+    case "progress_update_late":
+      return <TrendingUp size={20} color={Colors.info} />;
+    case "contract_ready":
+    case "contract_signed":
+    case "document_uploaded":
+    case "document_approval_needed":
+      return <FileCheck size={20} color={Colors.primary} />;
+    case "inspection_scheduled":
+    case "inspection_completed":
+      return <CheckCircle size={20} color={Colors.info} />;
+    case "team_member_added":
+    case "team_member_removed":
+      return <Users size={20} color={Colors.secondary} />;
+    case "deadline_approaching":
+    case "deadline_missed":
+      return <Clock size={20} color={Colors.error} />;
+    case "system_alert":
+      return <AlertCircle size={20} color={Colors.warning} />;
     default:
       return <Bell size={20} color={Colors.textSecondary} />;
   }
 };
 
-const getNotificationColor = (type: JobNotification["type"]) => {
-  switch (type) {
-    case "new_job":
-      return Colors.info;
-    case "new_application":
-      return Colors.primary;
-    case "application_accepted":
-      return Colors.success;
-    case "application_rejected":
-      return Colors.error;
-    case "new_message":
-      return Colors.secondary;
-    case "estimate_requested":
-    case "estimate_confirmed":
-    case "estimate_reminder":
-    case "estimate_completed":
-      return Colors.warning;
-    default:
-      return Colors.textSecondary;
+const getNotificationColor = (type: NotificationType) => {
+  if (type.includes("accepted") || type.includes("approved") || type.includes("completed") || type.includes("resolved")) {
+    return Colors.success;
   }
+  if (type.includes("rejected") || type.includes("cancelled") || type.includes("dispute") || type.includes("missed")) {
+    return Colors.error;
+  }
+  if (type.includes("payment") || type.includes("escrow")) {
+    return Colors.success;
+  }
+  if (type.includes("reminder") || type.includes("approaching") || type.includes("late")) {
+    return Colors.warning;
+  }
+  if (type.includes("message")) {
+    return Colors.secondary;
+  }
+  return Colors.primary;
 };
+
+function TrendingUp({ size, color }: { size: number; color: string }) {
+  return <FileText size={size} color={color} />;
+}
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
   const {
-    getUserNotifications,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-    getUnreadNotificationsCount,
-  } = useJobs();
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
-  const notifications = getUserNotifications();
-  const unreadCount = getUnreadNotificationsCount();
+  const handleNotificationPress = (notification: Notification) => {
+    markAsRead(notification.id);
 
-  const handleNotificationPress = (notification: JobNotification) => {
-    markNotificationAsRead(notification.id);
-
-    if (notification.jobId) {
+    if (notification.actionUrl) {
+      router.push(notification.actionUrl as any);
+    } else if (notification.jobId) {
       router.push(`/job-details?id=${notification.jobId}`);
     } else if (notification.appointmentId) {
       router.push(`/appointment-details?id=${notification.appointmentId}`);
+    } else if (notification.bidId) {
+      router.push(`/bid-details?id=${notification.bidId}`);
+    } else if (notification.projectId) {
+      router.push(`/project-dashboard?id=${notification.projectId}`);
     }
   };
 
   const handleMarkAllRead = () => {
-    markAllNotificationsAsRead();
+    markAllAsRead();
   };
 
   const groupedNotifications = useMemo(() => {
@@ -107,7 +168,7 @@ export default function NotificationsScreen() {
 
     const groups: {
       title: string;
-      data: JobNotification[];
+      data: Notification[];
     }[] = [];
 
     const todayNotifs = notifications.filter((n) => {
@@ -176,7 +237,7 @@ export default function NotificationsScreen() {
           <BellOff size={64} color={Colors.textTertiary} />
           <Text style={styles.emptyStateTitle}>No Notifications</Text>
           <Text style={styles.emptyStateText}>
-            You're all caught up! Notifications will appear here.
+            You&apos;re all caught up! Notifications will appear here.
           </Text>
         </View>
       ) : (
@@ -191,6 +252,8 @@ export default function NotificationsScreen() {
                   style={[
                     styles.notificationCard,
                     !notification.read && styles.notificationCardUnread,
+                    notification.priority === "high" && styles.notificationCardHigh,
+                    notification.priority === "critical" && styles.notificationCardCritical,
                   ]}
                   onPress={() => handleNotificationPress(notification)}
                 >
@@ -298,6 +361,14 @@ const styles = StyleSheet.create({
   },
   notificationCardUnread: {
     backgroundColor: Colors.primary + "08",
+  },
+  notificationCardHigh: {
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.warning,
+  },
+  notificationCardCritical: {
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.error,
   },
   iconContainer: {
     width: 40,

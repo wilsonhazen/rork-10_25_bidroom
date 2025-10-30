@@ -6,6 +6,7 @@ import { Job } from "@/types";
 import { Stack, useRouter } from "expo-router";
 import { Calendar, FileText, TrendingUp, Users } from "lucide-react-native";
 import React, { useMemo } from "react";
+import NotificationBell from "@/components/NotificationBell";
 import {
   ScrollView,
   StyleSheet,
@@ -127,6 +128,7 @@ export default function HomeScreen() {
             color: Colors.text,
             fontWeight: "700" as const,
           },
+          headerRight: () => <NotificationBell />,
         }}
       />
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>

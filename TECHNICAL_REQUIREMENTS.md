@@ -361,15 +361,28 @@ CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id),
-  type VARCHAR(50) NOT NULL,
+  type VARCHAR(100) NOT NULL,
   title VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
+  priority VARCHAR(20) DEFAULT 'normal',
   read BOOLEAN DEFAULT false,
+  action_url TEXT,
+  job_id UUID REFERENCES jobs(id),
+  application_id UUID REFERENCES job_applications(id),
+  appointment_id UUID REFERENCES appointments(id),
+  bid_id UUID REFERENCES bids(id),
+  project_id UUID REFERENCES projects(id),
+  milestone_id UUID REFERENCES project_milestones(id),
+  dispute_id UUID REFERENCES disputes(id),
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_type ON notifications(type);
+CREATE INDEX idx_notifications_priority ON notifications(priority);
+CREATE INDEX idx_notifications_read ON notifications(user_id, read);
+CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
 ```
 
 ### Row Level Security (Supabase)
@@ -1612,7 +1625,237 @@ export const subscribeToProject = (
 
 ---
 
-### 13.8 Notification Rules
+## 15. Notification System
+
+### 15.1 Notification Types
+
+The application supports 55+ notification types across all features:
+
+#### Job & Application Notifications
+- **new_job**: New job posted matching user's trade/location
+- **new_application**: New application received for a job
+- **application_accepted**: Application was accepted
+- **application_rejected**: Application was rejected
+- **application_withdrawn**: Applicant withdrew their application
+- **job_updated**: Job details were modified
+- **job_cancelled**: Job was cancelled by poster
+
+#### Estimate & Appointment Notifications
+- **estimate_requested**: Site estimate requested
+- **estimate_confirmed**: Estimate appointment confirmed
+- **estimate_reminder**: Reminder for upcoming estimate (24h before)
+- **estimate_completed**: Estimate appointment was completed
+- **estimate_cancelled**: Estimate was cancelled
+- **appointment_scheduled**: New appointment scheduled
+- **appointment_confirmed**: Appointment confirmed by other party
+- **appointment_reminder**: Reminder for upcoming appointment (24h before)
+- **appointment_cancelled**: Appointment was cancelled
+- **appointment_rescheduled**: Appointment time changed
+
+#### Messaging Notifications
+- **new_message**: New message received in conversation
+
+#### Bidding Notifications
+- **bid_invitation**: Invited to submit bid
+- **bid_submitted**: Bid was submitted successfully
+- **bid_accepted**: Bid was accepted (triggers project creation)
+- **bid_rejected**: Bid was not selected
+- **bid_updated**: Bid details were modified
+
+#### Project Management Notifications
+- **project_created**: New project created from accepted bid
+- **project_started**: Project work has officially started
+- **project_completed**: Project marked as complete
+
+#### Milestone Notifications
+- **milestone_created**: New milestone added to project
+- **milestone_submitted**: Contractor submitted milestone for review
+- **milestone_approved**: Owner approved milestone completion
+- **milestone_rejected**: Owner rejected milestone (needs revision)
+- **milestone_payment_released**: Payment released for approved milestone
+
+#### Payment & Escrow Notifications
+- **payment_received**: Payment received successfully
+- **payment_sent**: Payment sent successfully
+- **payment_failed**: Payment transaction failed
+- **escrow_deposited**: Funds deposited into project escrow
+- **escrow_released**: Funds released from escrow
+
+#### Change Order Notifications
+- **change_order_requested**: Change order submitted
+- **change_order_approved**: Change order approved
+- **change_order_rejected**: Change order rejected
+
+#### Dispute Notifications
+- **dispute_filed**: New dispute filed
+- **dispute_resolved**: Dispute was resolved
+- **dispute_escalated**: Dispute escalated to higher level
+
+#### Progress & Document Notifications
+- **progress_update_posted**: Daily progress update posted
+- **progress_update_late**: Progress update is overdue
+- **contract_ready**: Contract generated and ready for review
+- **contract_signed**: All parties signed the contract
+- **document_uploaded**: New document uploaded to project
+- **document_approval_needed**: Document requires approval
+
+#### Inspection Notifications
+- **inspection_scheduled**: Inspection appointment scheduled
+- **inspection_completed**: Inspection completed
+
+#### Team Notifications
+- **team_member_added**: New member added to project team
+- **team_member_removed**: Member removed from project team
+
+#### System & Alert Notifications
+- **system_alert**: Important system message
+- **deadline_approaching**: Project deadline approaching (3 days)
+- **deadline_missed**: Project deadline was missed
+
+### 15.2 Notification Priorities
+
+Notifications are categorized by priority level:
+
+**Low Priority:**
+- Progress updates
+- Document uploads (non-critical)
+- Team member changes
+- General system alerts
+
+**Normal Priority:**
+- New jobs matching criteria
+- New applications
+- Appointment reminders
+- Bid submissions
+- Progress reports
+
+**High Priority:**
+- Application accepted/rejected
+- Milestone submitted for review
+- Change order requests
+- Escrow deposits
+- Deadlines approaching
+
+**Critical Priority:**
+- Payment failures
+- Disputes filed
+- Contract signing required
+- Deadlines missed
+- Safety issues
+- Project cancellations
+
+### 15.3 Notification Delivery
+
+#### In-App Notifications
+All notifications appear in the notification bell icon with unread badge count.
+
+#### Real-Time Updates
+Notifications are delivered immediately via:
+- WebSocket connections (when implemented)
+- Context state updates
+- UI badge updates
+
+#### Notification Grouping
+Notifications are grouped by time period:
+- Today
+- Yesterday
+- This Week
+- Older
+
+### 15.4 Notification Actions
+
+Each notification can have an action URL that navigates to:
+- Job details page
+- Application details
+- Appointment details
+- Bid details
+- Project dashboard
+- Milestone details
+- Dispute resolution page
+- Messages/conversation
+
+### 15.5 Notification Management
+
+Users can:
+- View all notifications
+- Mark individual notifications as read
+- Mark all notifications as read
+- Delete individual notifications
+- Delete all notifications
+- Filter by type (future enhancement)
+- Filter by priority (future enhancement)
+
+### 15.6 Notification Triggers
+
+```typescript
+// Example: When application is accepted
+const handleAcceptApplication = async (applicationId: string) => {
+  await updateApplication(applicationId, { status: 'accepted' });
+  
+  // Notify applicant
+  addNotification({
+    type: 'application_accepted',
+    title: 'Application Accepted!',
+    message: `Your application for "${job.title}" has been accepted.`,
+    priority: 'high',
+    jobId: job.id,
+    applicationId: applicationId,
+  });
+};
+
+// Example: When milestone is submitted
+const handleSubmitMilestone = async (milestoneId: string) => {
+  await updateMilestone(milestoneId, { status: 'pending_review' });
+  
+  // Notify owner
+  addNotification({
+    type: 'milestone_submitted',
+    title: 'Milestone Ready for Review',
+    message: `"${milestone.title}" has been submitted for your approval.`,
+    priority: 'high',
+    projectId: milestone.projectId,
+    milestoneId: milestoneId,
+  });
+};
+
+// Example: When payment is released
+const handleReleasePayment = async (milestoneId: string, amount: number) => {
+  await releaseMilestonePayment(milestoneId, amount);
+  
+  // Notify contractor
+  addNotification({
+    type: 'milestone_payment_released',
+    title: 'Payment Released',
+    message: `${amount.toLocaleString()} has been released for milestone completion.`,
+    priority: 'high',
+    projectId: milestone.projectId,
+    milestoneId: milestoneId,
+  });
+};
+```
+
+### 15.7 Notification Storage
+
+Notifications are stored:
+- **Frontend**: AsyncStorage (up to 100 per user)
+- **Backend**: PostgreSQL notifications table (permanent)
+- **Cleanup**: Old notifications pruned after 90 days
+
+### 15.8 Future Enhancements
+
+- [ ] Push notifications (iOS/Android)
+- [ ] Email notifications (digest)
+- [ ] SMS notifications (critical only)
+- [ ] Notification preferences per type
+- [ ] Do Not Disturb schedule
+- [ ] Notification sound customization
+- [ ] Grouped notifications by project
+- [ ] Notification search
+- [ ] Export notification history
+
+---
+
+### 13.8 Notification Rules (Project Specific)
 
 ```typescript
 // Project notification triggers
