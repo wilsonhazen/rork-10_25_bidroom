@@ -262,7 +262,7 @@ export default function MessagesScreen() {
           <KeyboardAvoidingView
             style={styles.chatContainer}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 20}
           >
             <View style={styles.chatHeader}>
               <Text style={styles.chatTitle}>
@@ -558,6 +558,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row" as const,
     padding: 16,
+    paddingBottom: Platform.OS === "ios" ? 16 : 16,
     backgroundColor: Colors.surface,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
