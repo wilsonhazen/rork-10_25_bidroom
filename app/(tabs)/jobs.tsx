@@ -8,7 +8,9 @@ import {
   TextInput,
   ScrollView,
   Modal,
+  Platform,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import {
   Briefcase,
   Plus,
@@ -17,6 +19,7 @@ import {
   Clock,
   DollarSign,
   X,
+  Calendar,
 } from "lucide-react-native";
 import { Stack, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
@@ -256,6 +259,10 @@ function PostJobModal({
   const [submitting, setSubmitting] = useState(false);
   const [showTradePicker, setShowTradePicker] = useState(false);
   const [showUrgencyPicker, setShowUrgencyPicker] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [startDateObj, setStartDateObj] = useState(new Date());
+  const [endDateObj, setEndDateObj] = useState(new Date());
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.description) {
@@ -373,28 +380,28 @@ function PostJobModal({
           <View style={styles.formRow}>
             <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
               <Text style={styles.label}>Start Date</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                value={formData.startDate}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, startDate: text })
-                }
-                placeholderTextColor={Colors.textTertiary}
-              />
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowStartDatePicker(true)}
+              >
+                <Calendar size={18} color={Colors.textSecondary} />
+                <Text style={styles.datePickerText}>
+                  {formData.startDate || "Select date"}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.formGroup, { flex: 1, marginLeft: 8 }]}>
               <Text style={styles.label}>End Date (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                value={formData.endDate}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, endDate: text })
-                }
-                placeholderTextColor={Colors.textTertiary}
-              />
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowEndDatePicker(true)}
+              >
+                <Calendar size={18} color={Colors.textSecondary} />
+                <Text style={styles.datePickerText}>
+                  {formData.endDate || "Select date"}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -548,6 +555,124 @@ function PostJobModal({
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {showStartDatePicker && (
+        <DateTimePicker
+          value={startDateObj}
+          mode="date"
+          display={Platform.OS === "ios" ? "spinner" : "default"}
+          onChange={(event, selectedDate) => {
+            if (Platform.OS === "android") {
+              setShowStartDatePicker(false);
+            }
+            if (selectedDate) {
+              setStartDateObj(selectedDate);
+              setFormData({
+                ...formData,
+                startDate: selectedDate.toISOString().split("T")[0],
+              });
+            }
+          }}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {Platform.OS === "ios" && showStartDatePicker && (
+        <Modal
+          visible={showStartDatePicker}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowStartDatePicker(false)}
+        >
+          <TouchableOpacity
+            style={styles.pickerOverlay}
+            activeOpacity={1}
+            onPress={() => setShowStartDatePicker(false)}
+          >
+            <View style={styles.datePickerModal}>
+              <View style={styles.pickerHeader}>
+                <TouchableOpacity onPress={() => setShowStartDatePicker(false)}>
+                  <Text style={styles.datePickerDone}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={startDateObj}
+                mode="date"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setStartDateObj(selectedDate);
+                    setFormData({
+                      ...formData,
+                      startDate: selectedDate.toISOString().split("T")[0],
+                    });
+                  }
+                }}
+                minimumDate={new Date()}
+                style={styles.iosDatePicker}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
+      {showEndDatePicker && Platform.OS === "android" && (
+        <DateTimePicker
+          value={endDateObj}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowEndDatePicker(false);
+            if (selectedDate) {
+              setEndDateObj(selectedDate);
+              setFormData({
+                ...formData,
+                endDate: selectedDate.toISOString().split("T")[0],
+              });
+            }
+          }}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {Platform.OS === "ios" && showEndDatePicker && (
+        <Modal
+          visible={showEndDatePicker}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowEndDatePicker(false)}
+        >
+          <TouchableOpacity
+            style={styles.pickerOverlay}
+            activeOpacity={1}
+            onPress={() => setShowEndDatePicker(false)}
+          >
+            <View style={styles.datePickerModal}>
+              <View style={styles.pickerHeader}>
+                <TouchableOpacity onPress={() => setShowEndDatePicker(false)}>
+                  <Text style={styles.datePickerDone}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={endDateObj}
+                mode="date"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) {
+                    setEndDateObj(selectedDate);
+                    setFormData({
+                      ...formData,
+                      endDate: selectedDate.toISOString().split("T")[0],
+                    });
+                  }
+                }}
+                minimumDate={new Date()}
+                style={styles.iosDatePicker}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      )}
     </Modal>
   );
 }
@@ -833,5 +958,35 @@ const styles = StyleSheet.create({
   pickerItemTextActive: {
     color: Colors.primary,
     fontWeight: "600" as const,
+  },
+  datePickerButton: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  datePickerText: {
+    fontSize: 16,
+    color: Colors.text,
+  },
+  datePickerModal: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: 20,
+  },
+  datePickerDone: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.primary,
+    marginLeft: "auto",
+  },
+  iosDatePicker: {
+    backgroundColor: Colors.surface,
   },
 });
