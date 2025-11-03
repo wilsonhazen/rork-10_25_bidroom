@@ -16,7 +16,7 @@
 Bidroom is a construction job and contractor management mobile application that connects job posters (Project Managers) with contractors (General Contractors, Subcontractors, and Trade Specialists) for construction projects.
 
 ### Current State
-The app is feature-complete with mock data and works flawlessly in development on iOS, Android, and Web platforms. All core features are implemented and tested.
+The app includes comprehensive construction management features with mock data and is under active development for iOS, Android, and Web platforms. Core features including role-based dashboards, AI-powered contract generation, and project management workflows are implemented.
 
 ### Platforms
 - **Mobile**: iOS and Android (React Native)
@@ -145,19 +145,112 @@ The app is feature-complete with mock data and works flawlessly in development o
   - Verification badge
   - Location
 
-#### Contractor Profiles
-- Contact information (phone, email)
-- Company details
-- Trade specializations
+#### Contractor Profile Page
+Comprehensive contractor profile view accessible to project managers and owners.
+
+**Header Section:**
+- Profile photo or company logo
+- Company name
+- Primary trade specialization
+- Location and service area
+- Verification badges (licensed, insured, background checked)
+- Overall rating (stars) and review count
+- Years in business
+- Quick actions (Message, Request Estimate, Invite to Job)
+
+**About Section:**
+- Company description/bio
+- Mission statement
+- Specializations and services offered
+- Service area map
+
+**Professional Details:**
+- License information:
+  - License number(s)
+  - License type
+  - Expiration date
+  - Verification status
+- Insurance information:
+  - Liability insurance
+  - Workers compensation
+  - Coverage amounts
+  - Verification status
+- Certifications:
+  - Professional certifications
+  - Training credentials
+  - Industry affiliations
+- Bonding information (if applicable)
+
+**Experience & Credentials:**
 - Years of experience
-- Certifications and licenses
-- Insurance information
-- Portfolio (images/videos)
 - Completed projects count
-- Ratings and reviews
-- Service area
-- Hourly rate
-- Bio/description
+- Specializations (detailed list)
+- Types of projects (residential, commercial, etc.)
+- Team size
+
+**Portfolio:**
+- Project photo gallery
+- Before/after comparisons
+- Project descriptions
+- Video walkthroughs (if available)
+- Featured projects
+- Filter by project type
+
+**Reviews & Ratings:**
+- Overall rating breakdown
+- Category ratings:
+  - Quality of work
+  - Communication
+  - Timeline adherence
+  - Professionalism
+  - Value for money
+- Recent reviews with:
+  - Reviewer name and date
+  - Star rating
+  - Written review
+  - Project photos (if included)
+  - Contractor response (if any)
+- Filter reviews (all, positive, critical)
+- Sort reviews (recent, highest, lowest)
+
+**Trust & Verification:**
+- Trust score indicators
+- Verification status:
+  - Identity verified
+  - License verified
+  - Insurance verified
+  - Background check completed
+- Response metrics:
+  - Typical response time
+  - Response rate
+- Performance metrics:
+  - Project completion rate
+  - On-time completion rate
+  - Repeat customer rate
+
+**Pricing & Availability:**
+- Hourly rate range (if disclosed)
+- Typical project rates
+- Current availability
+- Booking lead time
+
+**Contact & Actions:**
+- Contact information (phone, email, website)
+- Business address
+- Action buttons:
+  - Request Estimate
+  - Send Message
+  - Invite to Job
+  - Invite to Bid
+  - Save to Favorites
+  - Share Profile
+  - Report Profile
+
+**Recent Activity:**
+- Recently completed projects
+- Recent reviews received
+- Platform member since date
+- Last active date
 
 #### Request Estimates
 - Submit estimate request with:
@@ -349,6 +442,8 @@ The app is feature-complete with mock data and works flawlessly in development o
 - Privacy settings
 - Language preferences
 - Delete account
+- Two-factor authentication
+- Data export and deletion (GDPR)
 
 #### Profile Actions
 - View profile as others see it
@@ -356,6 +451,13 @@ The app is feature-complete with mock data and works flawlessly in development o
 - Download profile information
 - Request verification
 - Update verification documents
+- Edit profile information
+
+#### Settings Pages
+- **General Settings**: Account preferences, notifications
+- **Privacy & Security**: Data privacy, security settings, account access
+- **Help & Support**: FAQs, contact support, tutorials
+- **Terms & Policies**: Terms of Service, Privacy Policy, legal agreements
 
 ---
 
@@ -609,31 +711,70 @@ The app is feature-complete with mock data and works flawlessly in development o
 When a bid is accepted, Bidroom transforms into a comprehensive construction management platform that automates the entire project lifecycle from contract generation to final closeout.
 
 #### Complete Workflow Overview
-1. **Contract Setup** - AI-generated contracts, digital signing, escrow initialization
-2. **Team Assembly** - Sub-bidding, contractor selection, role assignments
-3. **Active Construction** - Auto-timeline, daily check-ins, AI monitoring, milestone-based payments
-4. **Dispute Resolution** - Chat logging, clause flagging, legal escalation
-5. **Project Closeout** - Final inspection, media archiving, analytics
+1. **Project Setup** - AI-assisted contract generation with owner notes and California contractor law provisions
+2. **Contract Setup** - Digital signing, legal protections, escrow initialization
+3. **Team Assembly** - Sub-bidding, contractor selection, role assignments
+4. **Active Construction** - Auto-timeline, daily check-ins, AI monitoring, milestone-based payments
+5. **Dispute Resolution** - Chat logging, clause flagging, legal escalation
+6. **Project Closeout** - Final inspection, media archiving, analytics
 
 ---
 
 ### 6.1.1 Detailed Workflow Stages
 
+#### Stage 0: Project Setup (New)
+**What Happens:**
+- Owner initiates project setup from accepted bid
+- System presents project information form:
+  - Project details (name, location, dates)
+  - Owner can add detailed notes about:
+    - Specific requirements or preferences
+    - Special considerations
+    - Key concerns or priorities
+    - Any unique project aspects
+- AI analyzes:
+  - Accepted bid details
+  - Owner's notes
+  - Project location (California)
+  - Trade type and scope
+- AI generates comprehensive contract draft including:
+  - Full scope of work breakdown
+  - California-specific contractor law provisions:
+    - California Contractors State License Law (CSLB)
+    - Mechanic's lien rights and waivers
+    - Required licensing and permits
+    - Payment bond requirements (if applicable)
+    - Change order regulations
+    - California construction defect law protections
+    - Mandatory insurance requirements
+    - Right to rescission (if applicable)
+    - Dispute resolution per California law
+  - Owner protections:
+    - Lien release requirements
+    - Performance guarantees
+    - Warranty provisions
+    - Payment milestone protections
+  - Contractor protections:
+    - Payment terms and timelines
+    - Scope change procedures
+    - Suspension rights for non-payment
+- Contract is fully editable before acceptance
+- Owner can review, modify, and request legal review
+
+**User Actions:**
+- Owner: Provide project notes to help AI generate appropriate contract
+- System: Generate contract with California law provisions and owner/contractor protections
+- Owner: Review, edit, and approve contract draft
+- Contractor: Review contract before signing
+
 #### Stage 1: Contract Setup & Escrow
 **What Happens:**
-- AI analyzes accepted bid (scope, budget, timeline)
-- System generates contract draft with:
-  - Full scope of work breakdown
-  - Legal terms and conditions
-  - Payment milestones (20-30% tranches)
-  - Non-performance clauses
-  - Termination conditions
-  - Warranty provisions
-- Owner receives notification to review contract
+- Owner receives AI-generated contract with California provisions
 - Owner reviews and digitally signs
 - System establishes escrow account
 - Full project funds deposited to third-party escrow
 - Contractor notified of contract execution
+- Contractor reviews and digitally signs
 - Work authorization issued
 
 **User Actions:**
@@ -818,16 +959,30 @@ When a bid is accepted, Bidroom transforms into a comprehensive construction man
 ### 6.1.2 Key Automation Features
 
 #### AI Contract Generation
-- Input: Accepted bid details (scope, budget, timeline)
+- Input: 
+  - Accepted bid details (scope, budget, timeline)
+  - Owner's project notes and requirements
+  - Location (California)
+  - Trade type and specialization
 - Output: Complete contract with:
   - CSI-formatted scope of work
-  - State-specific legal clauses
-  - Payment milestone schedule
-  - Change order procedures
-  - Dispute resolution process
+  - California-specific legal clauses:
+    - Contractors State License Law requirements
+    - Mechanic's lien provisions and protections
+    - California-specific payment terms
+    - Required bonds and insurance
+    - Construction defect law protections
+    - Mandatory licensing disclosures
+  - State-compliant payment milestone schedule
+  - Change order procedures per California regulations
+  - Dispute resolution process (arbitration/mediation)
+  - Owner protections (lien waivers, warranties)
+  - Contractor protections (payment security, scope protection)
+- Notes Integration: AI incorporates owner's notes throughout contract
 - Editing: Fully editable before signing
-- Templates: AIA-standard contracts adapted per trade
-- Generation time: <5 seconds
+- Legal Review: Option to send for attorney review
+- Templates: California-compliant AIA-standard contracts adapted per trade
+- Generation: Real-time AI generation based on inputs
 
 #### AI Progress Monitoring
 - **Photo Analysis**: AWS Rekognition or similar
@@ -1282,32 +1437,181 @@ When a bid is accepted, Bidroom transforms into a comprehensive construction man
 
 ---
 
-### 6.11 Project Dashboard
+### 6.11 Role-Based Dashboards
 
 #### Owner Dashboard
-- **Project overview**:
-  - Project status and phase
-  - Overall completion percentage
-  - Days remaining
+Comprehensive project management interface for property owners and project managers.
+
+**Overview Section:**
+- Active projects count and status
+- Pending approvals requiring action
+- Recent notifications summary
+- Quick action buttons (Post Job, View Bids, etc.)
+
+**Active Projects:**
+- Project cards with:
+  - Project name and location
+  - Current phase and completion %
   - Budget vs actual spending
-- **Milestone status**: Visual timeline
-- **Recent updates**: Latest contractor updates
-- **Pending actions**: Items requiring owner approval
-- **Payment status**: Escrow balance, payments made/pending
-- **Communication**: Unread messages
-- **Upcoming inspections**: Scheduled inspections
-- **Document access**: All project documents
-- **Photo gallery**: All project photos organized
+  - Days remaining
+  - Contractor information
+  - Status indicators (on track, delayed, issues)
+  - Pending approvals badge
+- Filter by status, date, trade
+- Search projects
+
+**Jobs & Applications:**
+- Posted jobs (active, filled, closed)
+- Application management:
+  - New applications awaiting review
+  - Application count per job
+  - Applicant details and ratings
+  - Accept/reject actions
+- Job posting quick action
+
+**Bids & Contracts:**
+- Open bid requests
+- Received bids awaiting review
+- Bid comparison tools
+- Contract status tracking
+- Award/decline actions
+
+**Milestones & Approvals:**
+- Pending milestone approvals
+- Milestone review interface:
+  - View submitted proof (photos/videos)
+  - Inspection scheduling
+  - Approve/request revision/reject
+- Approval history
+- Payment release tracking
+
+**Payments & Financials:**
+- Escrow balance overview
+- Payment history (released, pending)
+- Upcoming payment obligations
+- Transaction receipts
+- Budget tracking across projects
+
+**Schedule & Appointments:**
+- Calendar view of inspections and meetings
+- Upcoming appointments
+- Estimate requests to review
+- Schedule management
+
+**Communication Hub:**
+- Unread message count
+- Recent conversations
+- Quick access to project discussions
+- Notification center
+
+**Contractors:**
+- Saved contractors
+- Favorite contractors
+- Contractor search and invite
+- Contractor ratings and reviews
+
+**Analytics:**
+- Project completion trends
+- Spending analytics
+- Timeline performance
+- Contractor performance metrics
 
 #### Contractor Dashboard
-- **Active projects**: All active projects
-- **Today's tasks**: What needs to be done today
-- **Pending approvals**: Milestones awaiting approval
-- **Payment status**: Expected payments and received
-- **Daily update required**: Reminder to post update
-- **Change orders**: Pending change order requests
-- **Issues/flags**: Any disputes or concerns
-- **Schedule**: Upcoming milestones and deadlines
+Streamlined workflow interface for general contractors and subcontractors.
+
+**Overview Section:**
+- Active projects count
+- Today's tasks and priorities
+- Pending approvals status
+- Earnings summary (pending, received)
+- Action items requiring attention
+
+**Active Projects:**
+- Project cards showing:
+  - Project name and owner
+  - Current phase
+  - Today's required actions
+  - Upcoming milestones
+  - Payment status
+  - Update status (posted today/overdue)
+- One-tap daily update
+- Quick access to project details
+
+**Job Opportunities:**
+- Available jobs matching trade
+- Bid invitations received
+- Job search and filtering
+- Saved jobs
+- Application tracking (pending, accepted, rejected)
+
+**Bids & Proposals:**
+- Active bids submitted
+- Bid invitations
+- Awarded contracts
+- Bid status tracking
+- Quick bid submission
+
+**Daily Updates:**
+- Update reminder/checklist
+- Photo/video upload interface
+- Work log entry
+- Time tracking
+- Crew member logging
+- Issue reporting
+
+**Milestones & Submissions:**
+- Upcoming milestones
+- Ready to submit milestones
+- Pending review status
+- Revision requests
+- Milestone proof upload
+- Approval tracking
+
+**Payments & Earnings:**
+- Expected payments by project
+- Payment history
+- Pending approvals affecting payment
+- Invoice management
+- Earnings analytics
+
+**Schedule & Tasks:**
+- Today's agenda
+- Upcoming appointments
+- Estimate requests
+- Inspection schedules
+- Deadline tracking
+
+**Communication:**
+- Unread messages by project
+- Owner communications
+- Team coordination (if GC)
+- Quick message access
+
+**Profile & Portfolio:**
+- Profile completion status
+- Portfolio management
+- Reviews and ratings
+- Verification status
+- License and insurance updates
+
+**Analytics:**
+- Job win rate
+- Project completion stats
+- Earnings trends
+- Response time metrics
+- Trust score indicators
+
+#### Dashboard Features (Both Roles):
+- Real-time updates
+- Push notifications
+- Quick actions
+- Search functionality
+- Filter and sort options
+- Customizable views
+- Export capabilities
+- Mobile-optimized interface
+- Offline data access
+- Smart reminders
 
 ---
 
@@ -1354,15 +1658,13 @@ When a bid is accepted, Bidroom transforms into a comprehensive construction man
 
 ## 7. Future Enhancements
 
-### Phase 1 (Post-Launch)
+### Planned Features
 - Push notifications
 - In-app messaging improvements
 - Advanced search filters
 - Saved searches
 - Email digest notifications
 - Calendar integration
-
-### Phase 2 (3-6 months)
 - Video portfolio support
 - Advanced analytics
 - Multi-project management
@@ -1370,23 +1672,20 @@ When a bid is accepted, Bidroom transforms into a comprehensive construction man
 - Equipment tracking
 - Material ordering integration
 
-### Phase 3 (6-12 months)
+### Advanced Integrations
 - Background checks integration
 - Insurance verification API
 - License verification API
 - Credit check integration
 - Automated contractor matching
 - AI-powered job recommendations
-
-### Phase 4 (12+ months)
 - Time tracking with GPS
 - Expense tracking
-- Client portal enhancements
 - Equipment rental marketplace
 - Supply chain integration
 - Accounting software integration
 
-### Advanced Features
+### Emerging Technologies
 - Machine learning for fraud detection
 - Predictive analytics
 - Advanced contractor scoring
@@ -1394,6 +1693,7 @@ When a bid is accepted, Bidroom transforms into a comprehensive construction man
 - Video call integration
 - Multi-language support
 - Smart contracts (blockchain)
+- IoT integration for progress tracking
 
 ---
 
