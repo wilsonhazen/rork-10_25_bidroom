@@ -254,6 +254,8 @@ function PostJobModal({
     requirements: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showTradePicker, setShowTradePicker] = useState(false);
+  const [showUrgencyPicker, setShowUrgencyPicker] = useState(false);
 
   const handleSubmit = async () => {
     if (!formData.title || !formData.description) {
@@ -332,20 +334,26 @@ function PostJobModal({
 
           <View style={styles.formRow}>
             <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
-              <Text style={styles.label}>Trade</Text>
-              <View style={styles.pickerContainer}>
+              <Text style={styles.label}>Trade *</Text>
+              <TouchableOpacity
+                style={styles.pickerContainer}
+                onPress={() => setShowTradePicker(true)}
+              >
                 <Text style={styles.pickerText}>{formData.trade}</Text>
-              </View>
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.formGroup, { flex: 1, marginLeft: 8 }]}>
               <Text style={styles.label}>Urgency</Text>
-              <View style={styles.pickerContainer}>
+              <TouchableOpacity
+                style={styles.pickerContainer}
+                onPress={() => setShowUrgencyPicker(true)}
+              >
                 <Text style={styles.pickerText}>
                   {formData.urgency.charAt(0).toUpperCase() +
                     formData.urgency.slice(1)}
                 </Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -448,6 +456,98 @@ function PostJobModal({
           </TouchableOpacity>
         </ScrollView>
       </View>
+
+      <Modal
+        visible={showTradePicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowTradePicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerOverlay}
+          activeOpacity={1}
+          onPress={() => setShowTradePicker(false)}
+        >
+          <View style={styles.pickerModal}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Trade</Text>
+              <TouchableOpacity onPress={() => setShowTradePicker(false)}>
+                <X size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.pickerList}>
+              {TRADES.filter((t) => t !== "All").map((trade) => (
+                <TouchableOpacity
+                  key={trade}
+                  style={[
+                    styles.pickerItem,
+                    formData.trade === trade && styles.pickerItemActive,
+                  ]}
+                  onPress={() => {
+                    setFormData({ ...formData, trade });
+                    setShowTradePicker(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.pickerItemText,
+                      formData.trade === trade && styles.pickerItemTextActive,
+                    ]}
+                  >
+                    {trade}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={showUrgencyPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowUrgencyPicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerOverlay}
+          activeOpacity={1}
+          onPress={() => setShowUrgencyPicker(false)}
+        >
+          <View style={styles.pickerModal}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Urgency</Text>
+              <TouchableOpacity onPress={() => setShowUrgencyPicker(false)}>
+                <X size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.pickerList}>
+              {["low", "medium", "high", "urgent"].map((urgency) => (
+                <TouchableOpacity
+                  key={urgency}
+                  style={[
+                    styles.pickerItem,
+                    formData.urgency === urgency && styles.pickerItemActive,
+                  ]}
+                  onPress={() => {
+                    setFormData({ ...formData, urgency: urgency as JobUrgency });
+                    setShowUrgencyPicker(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.pickerItemText,
+                      formData.urgency === urgency && styles.pickerItemTextActive,
+                    ]}
+                  >
+                    {urgency.charAt(0).toUpperCase() + urgency.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </Modal>
   );
 }
@@ -690,5 +790,48 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: Colors.white,
+  },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  pickerModal: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "70%",
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  pickerList: {
+    maxHeight: 400,
+  },
+  pickerItem: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  pickerItemActive: {
+    backgroundColor: Colors.primary + "10",
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: Colors.text,
+  },
+  pickerItemTextActive: {
+    color: Colors.primary,
+    fontWeight: "600" as const,
   },
 });
