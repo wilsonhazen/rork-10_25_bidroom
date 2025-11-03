@@ -3,40 +3,60 @@
 ## Table of Contents
 1. [Technology Stack](#technology-stack)
 2. [Architecture Overview](#architecture-overview)
-3. [Backend Integration](#backend-integration)
-4. [Database Schema](#database-schema)
-5. [API Specifications](#api-specifications)
-6. [Authentication Implementation](#authentication-implementation)
-7. [File Upload Architecture](#file-upload-architecture)
-8. [Real-Time Features](#real-time-features)
-9. [Security Requirements](#security-requirements)
-10. [Testing Strategy](#testing-strategy)
-11. [Performance Requirements](#performance-requirements)
-12. [Deployment Architecture](#deployment-architecture)
-13. [Development Roadmap](#development-roadmap)
+3. [Rork Platform Integration](#rork-platform-integration)
+4. [Backend Integration](#backend-integration)
+5. [Database Schema](#database-schema)
+6. [API Specifications](#api-specifications)
+7. [Authentication Implementation](#authentication-implementation)
+8. [File Upload Architecture](#file-upload-architecture)
+9. [Real-Time Features](#real-time-features)
+10. [Security Requirements](#security-requirements)
+11. [Testing Strategy](#testing-strategy)
+12. [Performance Requirements](#performance-requirements)
+13. [Deployment Architecture](#deployment-architecture)
+14. [Construction Management System Implementation](#construction-management-system-implementation)
+15. [Notification System](#notification-system)
+16. [Development Roadmap](#development-roadmap)
 
 ---
 
 ## 1. Technology Stack
 
 ### Frontend (Mobile & Web)
-- **React Native** 0.79.1
-- **React** 19.0.0
-- **Expo SDK** 53 (latest)
-- **Expo Router** v5 (file-based routing)
-- **TypeScript** 5.8.3 (strict mode)
-- **React Query** v5 (TanStack Query)
-- **AsyncStorage** for local persistence
-- **Lucide React Native** for icons
-- **React Native Gesture Handler**
-- **React Native Safe Area Context**
-- **React Native SVG**
+- **React Native** 0.81.5
+- **React** 19.1.0
+- **Expo SDK** 54.0.20+ (latest)
+- **Expo Router** v6.0.13 (file-based routing)
+- **TypeScript** 5.9.2 (strict mode)
+- **React Query** v5.90.5 (TanStack Query)
+- **AsyncStorage** 2.2.0 for local persistence
+- **Lucide React Native** 0.475.0 for icons
+- **React Native Gesture Handler** 2.28.0
+- **React Native Safe Area Context** 5.6.0
+- **React Native SVG** 15.12.1
+- **Expo Image** 3.0.10
+- **Expo Linear Gradient** 15.0.7
+- **Expo Blur** 15.0.7
+- **Zod** 4.1.12 (schema validation)
+- **Bun** (package manager and runtime)
 
 ### State Management
-- **@nkzw/create-context-hook** for context providers
-- **React Query** for server state
-- **AsyncStorage** for persistence
-- **useState** for local state
+- **@nkzw/create-context-hook** 1.1.0 for context providers
+- **React Query** for server state management
+- **AsyncStorage** for local data persistence
+- **useState** for component-level local state
+- **Zustand** 5.0.2 (optional, only if already in project code)
+
+### Rork Platform Features (Built-in)
+- **@rork/toolkit-sdk**: AI capabilities available globally
+  - **AI Chat Agent**: Conversational AI with tool calling
+  - **Text Generation**: LLM-powered text generation
+  - **Object Generation**: Structured data generation with Zod schemas
+  - **Image Generation**: DALL-E 3 image creation
+  - **Image Editing**: Gemini 2.5 Flash Image editing
+  - **Speech-to-Text**: Audio transcription
+- **Platform Integration**: No installation needed, globally available via TypeScript path mapping
+- **AI-Powered Features**: Contract generation, progress monitoring, dispute resolution
 
 ### Backend Options (Choose One)
 
@@ -73,7 +93,9 @@
 ├── app/                           # Expo Router pages
 │   ├── (tabs)/                   # Tab navigation
 │   │   ├── _layout.tsx          # Tab navigator config
-│   │   ├── index.tsx            # Home/Dashboard
+│   │   ├── (home)/              # Home tab with stack
+│   │   │   ├── _layout.tsx     # Home stack layout
+│   │   │   └── index.tsx       # Home/Dashboard screen
 │   │   ├── jobs.tsx             # Jobs listing
 │   │   ├── contractors.tsx      # Contractors directory
 │   │   ├── bids.tsx             # Bids management
@@ -82,23 +104,37 @@
 │   ├── _layout.tsx              # Root layout
 │   ├── login.tsx                # Login screen
 │   ├── register.tsx             # Registration
+│   ├── onboarding.tsx           # Onboarding flow
 │   ├── job-details.tsx          # Job detail view
 │   ├── bid-details.tsx          # Bid detail view
 │   ├── appointment-details.tsx  # Appointment detail
 │   ├── contractor-profile.tsx   # Contractor profile
 │   ├── messages.tsx             # Messaging
 │   ├── notifications.tsx        # Notifications
-│   └── settings.tsx             # App settings
+│   ├── settings.tsx             # App settings
+│   ├── privacy.tsx              # Privacy settings
+│   ├── help.tsx                 # Help & Support
+│   ├── terms.tsx                # Terms of Service
+│   ├── edit-profile.tsx         # Edit profile
+│   ├── project-setup.tsx        # Project setup (new)
+│   └── project-dashboard.tsx    # Project dashboard
 │
 ├── contexts/                     # Global state
 │   ├── AuthContext.tsx          # Authentication
 │   ├── JobsContext.tsx          # Jobs & applications
 │   ├── AppointmentsContext.tsx  # Appointments
-│   └── BidsContext.tsx          # Bids (to be created)
+│   ├── BidsContext.tsx          # Bids management
+│   ├── ProjectsContext.tsx      # Projects management
+│   └── NotificationsContext.tsx # Notifications
 │
 ├── components/                   # Reusable components
 │   ├── VerificationModal.tsx    # Verification UI
-│   └── TrustSuggestions.tsx     # Trust indicators
+│   ├── TrustSuggestions.tsx     # Trust indicators
+│   ├── NotificationBell.tsx     # Notification icon
+│   ├── SafeImage.tsx            # Safe image component
+│   └── dashboards/
+│       ├── OwnerDashboard.tsx   # Owner dashboard
+│       └── ContractorDashboard.tsx # Contractor dashboard
 │
 ├── services/                     # API services (to be created)
 │   ├── api/
@@ -107,7 +143,16 @@
 │   │   ├── appointments.ts     # Appointment endpoints
 │   │   ├── bids.ts             # Bids endpoints
 │   │   ├── messages.ts         # Messaging endpoints
-│   │   └── notifications.ts    # Notification endpoints
+│   │   ├── notifications.ts    # Notification endpoints
+│   │   └── projects.ts         # Projects endpoints
+│   ├── ai/
+│   │   ├── contract-generation.ts    # AI contract generation
+│   │   ├── progress-monitoring.ts    # AI progress analysis
+│   │   └── timeline-generation.ts    # AI timeline generation
+│   ├── payments/
+│   │   └── stripe.ts           # Payment processing
+│   ├── signatures/
+│   │   └── docusign.ts         # E-signature integration
 │   ├── realtime.ts             # Real-time subscriptions
 │   └── upload.ts               # File upload utilities
 │
@@ -121,7 +166,8 @@
 │
 ├── utils/                        # Utility functions
 │   ├── validation.ts           # Input validation
-│   └── trust.ts                # Trust score calculations
+│   ├── trust.ts                # Trust score calculations
+│   └── dashboard.ts            # Dashboard utilities
 │
 ├── hooks/                        # Custom hooks
 │   └── useSocialAuth.ts        # Social auth hooks
@@ -135,13 +181,15 @@
 ### Navigation Structure
 
 **Root Stack:**
-- Login (outside tabs)
-- Register (outside tabs)
-- Onboarding (outside tabs)
+- Login (outside tabs, modal presentation)
+- Register (outside tabs, modal presentation)
+- Onboarding (outside tabs, full screen)
 - Main App (tabs)
+- Project Setup (modal presentation)
+- Project Dashboard (full screen)
 
 **Tab Navigation:**
-1. Home - Dashboard with stats
+1. Home - Dashboard with stats (nested stack)
 2. Jobs - Jobs listing
 3. Contractors - Directory
 4. Bids - Bid management
@@ -161,9 +209,191 @@
 
 ---
 
-## 3. Backend Integration
+## 3. Rork Platform Integration
 
-### 3.1 API Service Layer
+### 3.1 AI Capabilities via @rork/toolkit-sdk
+
+The Rork platform provides built-in AI capabilities that are globally available without installation. These capabilities are accessed via `@rork/toolkit-sdk`, which is automatically available through TypeScript path mapping.
+
+#### Important: DO NOT Install @rork/toolkit-sdk
+```typescript
+// ❌ NEVER DO THIS - Do not add to package.json or install
+npm install @rork/toolkit-sdk
+
+// ✅ CORRECT - Just import and use directly
+import { generateText, generateObject } from '@rork/toolkit-sdk';
+```
+
+The package is globally available and will NOT appear in:
+- package.json dependencies
+- bun.lock
+- node_modules
+
+This is by design and uses TypeScript path mapping configured in the Rork environment.
+
+### 3.2 AI Text Generation
+
+```typescript
+import { generateText } from '@rork/toolkit-sdk';
+
+// Simple text generation
+const summary = await generateText("Summarize this project scope...");
+
+// With message history
+const response = await generateText({
+  messages: [
+    { role: 'user', content: 'What are the key milestones?' },
+    { role: 'assistant', content: 'The project has 5 milestones...' },
+    { role: 'user', content: 'Explain the first one' }
+  ]
+});
+```
+
+### 3.3 AI Structured Object Generation
+
+```typescript
+import { generateObject } from '@rork/toolkit-sdk';
+import { z } from 'zod';
+
+const ContractSchema = z.object({
+  scopeOfWork: z.object({
+    phases: z.array(z.object({
+      name: z.string(),
+      description: z.string(),
+      duration: z.number()
+    }))
+  }),
+  paymentSchedule: z.object({
+    milestones: z.array(z.object({
+      name: z.string(),
+      percentage: z.number()
+    }))
+  })
+});
+
+const contract = await generateObject({
+  messages: [{
+    role: 'user',
+    content: `Generate contract for ${project.description}`
+  }],
+  schema: ContractSchema
+});
+```
+
+### 3.4 AI Chat Agent with Tools
+
+```typescript
+import { createRorkTool, useRorkAgent } from '@rork/toolkit-sdk';
+
+const { messages, sendMessage, addToolResult } = useRorkAgent({
+  tools: {
+    addTodo: createRorkTool({
+      description: "Add a project milestone",
+      zodSchema: z.object({
+        title: z.string(),
+        dueDate: z.string(),
+        payment: z.number()
+      }),
+      execute(input) {
+        // Automatically executed when AI calls this tool
+        addMilestone(input);
+      }
+    })
+  }
+});
+
+// Send message
+await sendMessage("Add a milestone for foundation completion");
+
+// Render messages
+messages.map(m => (
+  <View key={m.id}>
+    {m.parts.map((part, i) => {
+      if (part.type === 'text') {
+        return <Text>{part.text}</Text>;
+      }
+      if (part.type === 'tool') {
+        return <Text>Calling {part.toolName}...</Text>;
+      }
+    })}
+  </View>
+));
+```
+
+### 3.5 AI Image Generation
+
+```typescript
+// Uses DALL-E 3
+const response = await fetch('https://toolkit.rork.com/images/generate/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    prompt: "Professional construction site photo",
+    size: "1024x1024" // or "1024x1792" or "1792x1024"
+  })
+});
+
+const { image } = await response.json();
+// image.base64Data - base64 encoded image
+// image.mimeType - image MIME type
+```
+
+### 3.6 AI Image Editing
+
+```typescript
+// Uses Gemini 2.5 Flash Image
+const response = await fetch('https://toolkit.rork.com/images/edit/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    prompt: "Add safety equipment highlights",
+    images: [{ type: 'image', image: base64Image }],
+    aspectRatio: "16:9" // optional, defaults to "16:9"
+  })
+});
+
+const { image } = await response.json();
+```
+
+### 3.7 Speech-to-Text
+
+```typescript
+// Audio transcription
+const formData = new FormData();
+formData.append('audio', {
+  uri: recording.getURI(),
+  name: 'recording.m4a',
+  type: 'audio/m4a'
+});
+
+const response = await fetch('https://toolkit.rork.com/stt/transcribe/', {
+  method: 'POST',
+  body: formData
+});
+
+const { text, language } = await response.json();
+```
+
+### 3.8 Project Assets
+
+Assets uploaded by users can be referenced and used:
+
+```typescript
+// If user mentions @asset_name, access it at:
+const assetUrl = `https://rork.app/pa/${projectId}/asset_name`;
+
+// Use with Expo Image
+<Image 
+  source={{ uri: assetUrl }} 
+  style={{ width: 300, height: 200 }}
+/>
+```
+
+---
+
+## 4. Backend Integration
+
+### 4.1 API Service Layer
 
 Create modular API clients in `services/api/`:
 
@@ -205,9 +435,20 @@ export const bidsApi = {
   updateBid: async (id: string, data: BidUpdate) => {...},
   submitBid: async (bidId: string, submission: BidSubmission) => {...}
 }
+
+// services/api/projects.ts
+export const projectsApi = {
+  fetchProjects: async () => {...},
+  createProject: async (data: ProjectCreate) => {...},
+  updateProject: async (id: string, data: ProjectUpdate) => {...},
+  fetchMilestones: async (projectId: string) => {...},
+  submitMilestone: async (milestoneId: string, proof: MilestoneProof) => {...},
+  approveMilestone: async (milestoneId: string) => {...},
+  rejectMilestone: async (milestoneId: string, reason: string) => {...}
+}
 ```
 
-### 3.2 React Query Integration
+### 4.2 React Query Integration
 
 Replace AsyncStorage with React Query in contexts:
 
@@ -239,7 +480,7 @@ export const [JobsContext, useJobs] = createContextHook(() => {
 });
 ```
 
-### 3.3 Environment Configuration
+### 4.3 Environment Configuration
 
 ```typescript
 // config/env.ts
@@ -249,13 +490,14 @@ export const config = {
   supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   googleAuthClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
   appleAuthClientId: process.env.EXPO_PUBLIC_APPLE_CLIENT_ID,
+  stripePublishableKey: process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   environment: process.env.EXPO_PUBLIC_ENVIRONMENT || 'development'
 };
 ```
 
 ---
 
-## 4. Database Schema
+## 5. Database Schema
 
 ### PostgreSQL Schema (Supabase Recommended)
 
@@ -385,6 +627,159 @@ CREATE INDEX idx_notifications_read ON notifications(user_id, read);
 CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
 ```
 
+### Construction Management Tables
+
+#### Projects Table
+```sql
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  bid_id UUID NOT NULL REFERENCES bids(id),
+  job_id UUID REFERENCES jobs(id),
+  owner_id UUID NOT NULL REFERENCES users(id),
+  contractor_id UUID NOT NULL REFERENCES users(id),
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  status VARCHAR(50) DEFAULT 'setup',
+  start_date DATE,
+  end_date DATE,
+  actual_start_date DATE,
+  actual_end_date DATE,
+  total_amount DECIMAL(12, 2) NOT NULL,
+  paid_amount DECIMAL(12, 2) DEFAULT 0,
+  escrow_balance DECIMAL(12, 2) DEFAULT 0,
+  completion_percentage INTEGER DEFAULT 0,
+  ai_monitoring_enabled BOOLEAN DEFAULT true,
+  daily_updates_required BOOLEAN DEFAULT true,
+  last_update_at TIMESTAMP WITH TIME ZONE,
+  contract_generated_at TIMESTAMP WITH TIME ZONE,
+  contract_signed_at TIMESTAMP WITH TIME ZONE,
+  escrow_funded_at TIMESTAMP WITH TIME ZONE,
+  work_started_at TIMESTAMP WITH TIME ZONE,
+  completed_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_projects_status ON projects(status);
+CREATE INDEX idx_projects_owner ON projects(owner_id);
+CREATE INDEX idx_projects_contractor ON projects(contractor_id);
+```
+
+#### AI Generated Contracts Table
+```sql
+CREATE TABLE ai_generated_contracts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  bid_id UUID NOT NULL REFERENCES bids(id),
+  owner_notes TEXT,
+  generated_contract JSONB NOT NULL,
+  california_law_provisions JSONB NOT NULL,
+  generation_time_ms INTEGER,
+  ai_model_version VARCHAR(50),
+  owner_edits JSONB,
+  contractor_edits JSONB,
+  final_contract JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+#### Project Milestones Table
+```sql
+CREATE TABLE project_milestones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  due_date DATE NOT NULL,
+  payment_amount DECIMAL(12, 2) NOT NULL,
+  deliverables TEXT[],
+  acceptance_criteria TEXT[],
+  status VARCHAR(50) DEFAULT 'not_started',
+  order_number INTEGER NOT NULL,
+  depends_on UUID REFERENCES project_milestones(id),
+  submitted_at TIMESTAMP WITH TIME ZONE,
+  approved_at TIMESTAMP WITH TIME ZONE,
+  approved_by UUID REFERENCES users(id),
+  rejection_reason TEXT,
+  revision_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_milestones_project ON project_milestones(project_id);
+CREATE INDEX idx_milestones_status ON project_milestones(status);
+```
+
+#### AI Progress Analysis Table
+```sql
+CREATE TABLE ai_progress_analysis (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  milestone_id UUID NOT NULL REFERENCES project_milestones(id),
+  progress_update_id UUID REFERENCES progress_updates(id),
+  analysis_result JSONB NOT NULL,
+  work_quality VARCHAR(50),
+  completion_percentage INTEGER,
+  issues_detected JSONB,
+  recommendations TEXT[],
+  compliance_check JSONB,
+  analyzed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_analysis_milestone ON ai_progress_analysis(milestone_id);
+```
+
+#### Progress Updates Table
+```sql
+CREATE TABLE progress_updates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  milestone_id UUID REFERENCES project_milestones(id),
+  contractor_id UUID NOT NULL REFERENCES users(id),
+  update_type VARCHAR(50) DEFAULT 'daily',
+  work_completed TEXT,
+  work_planned TEXT,
+  issues TEXT,
+  hours_worked DECIMAL(5, 2),
+  crew_members INTEGER,
+  photos TEXT[],
+  videos TEXT[],
+  gps_location JSONB,
+  weather_conditions VARCHAR(100),
+  ai_analyzed BOOLEAN DEFAULT false,
+  ai_analysis_id UUID REFERENCES ai_progress_analysis(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_progress_updates_project ON progress_updates(project_id);
+```
+
+#### Disputes Table
+```sql
+CREATE TABLE disputes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  milestone_id UUID REFERENCES project_milestones(id),
+  filed_by UUID NOT NULL REFERENCES users(id),
+  dispute_type VARCHAR(50) NOT NULL,
+  description TEXT NOT NULL,
+  evidence JSONB,
+  amount_disputed DECIMAL(12, 2),
+  desired_resolution TEXT,
+  status VARCHAR(50) DEFAULT 'filed',
+  resolution_stage VARCHAR(50) DEFAULT 'internal',
+  chat_logs JSONB,
+  flagged_clauses TEXT[],
+  auto_generated_demand_letter TEXT,
+  admin_assigned UUID REFERENCES users(id),
+  resolution TEXT,
+  resolved_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_disputes_project ON disputes(project_id);
+CREATE INDEX idx_disputes_status ON disputes(status);
+```
+
 ### Row Level Security (Supabase)
 
 ```sql
@@ -404,11 +799,17 @@ CREATE POLICY "Anyone can view open jobs" ON jobs
 -- Only PMs can create jobs
 CREATE POLICY "PMs can create jobs" ON jobs
   FOR INSERT WITH CHECK (project_manager_id = auth.uid());
+
+-- Project participants can view projects
+CREATE POLICY "Users can view own projects" ON projects
+  FOR SELECT USING (
+    owner_id = auth.uid() OR contractor_id = auth.uid()
+  );
 ```
 
 ---
 
-## 5. API Specifications
+## 6. API Specifications
 
 ### Authentication Endpoints
 
@@ -470,9 +871,33 @@ CREATE POLICY "PMs can create jobs" ON jobs
 }
 ```
 
+### Project Endpoints
+
+```typescript
+// POST /projects - Create project from accepted bid
+// GET /projects - Get all projects for user
+// GET /projects/:id - Get project details
+// PATCH /projects/:id - Update project
+
+// Milestones
+// POST /projects/:id/milestones - Create milestone
+// GET /projects/:id/milestones - Get all milestones
+// POST /projects/:id/milestones/:milestoneId/submit - Submit for review
+// POST /projects/:id/milestones/:milestoneId/approve - Approve milestone
+// POST /projects/:id/milestones/:milestoneId/reject - Reject milestone
+
+// Progress Updates
+// POST /projects/:id/updates - Create progress update
+// GET /projects/:id/updates - Get all updates
+
+// Disputes
+// POST /projects/:id/disputes - File dispute
+// GET /projects/:id/disputes - Get all disputes
+```
+
 ---
 
-## 6. Authentication Implementation
+## 7. Authentication Implementation
 
 ### JWT Token Strategy
 
@@ -537,7 +962,7 @@ export function useGoogleAuth() {
 
 ---
 
-## 7. File Upload Architecture
+## 8. File Upload Architecture
 
 ### Image Upload Implementation
 
@@ -574,12 +999,17 @@ storage/
 ├── avatars/{userId}.jpg
 ├── job-images/{jobId}/image-1.jpg
 ├── documents/{userId}/resume.pdf
-└── portfolios/{contractorId}/project-1.jpg
+├── portfolios/{contractorId}/project-1.jpg
+└── projects/
+    └── {projectId}/
+        ├── progress/{date}/photo-1.jpg
+        ├── milestones/{milestoneId}/proof-1.jpg
+        └── contracts/contract-signed.pdf
 ```
 
 ---
 
-## 8. Real-Time Features
+## 9. Real-Time Features
 
 ### Supabase Realtime Setup
 
@@ -609,26 +1039,9 @@ export const subscribeToMessages = (
 };
 ```
 
-### React Query Integration
-
-```typescript
-export const [MessagesContext, useMessages] = createContextHook(() => {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const unsubscribe = subscribeToMessages('*', (newMessage) => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    });
-    return unsubscribe;
-  }, []);
-
-  return {...};
-});
-```
-
 ---
 
-## 9. Security Requirements
+## 10. Security Requirements
 
 ### Security Checklist
 
@@ -661,7 +1074,7 @@ export const [MessagesContext, useMessages] = createContextHook(() => {
 
 ---
 
-## 10. Testing Strategy
+## 11. Testing Strategy
 
 ### Test Coverage Goals
 - **Unit Tests**: 80% coverage
@@ -683,14 +1096,15 @@ export const [MessagesContext, useMessages] = createContextHook(() => {
 - [ ] Accept/reject applications
 - [ ] Update job status
 
-**Real-time:**
-- [ ] Receive new messages
-- [ ] Receive notifications
-- [ ] Update unread counts
+**Project Management:**
+- [ ] Create project from bid
+- [ ] Submit milestone with proof
+- [ ] Approve/reject milestone
+- [ ] Payment release on approval
 
 ---
 
-## 11. Performance Requirements
+## 12. Performance Requirements
 
 ### Performance Targets
 - **Initial Load**: < 3 seconds
@@ -720,7 +1134,7 @@ export const [MessagesContext, useMessages] = createContextHook(() => {
 
 ---
 
-## 12. Deployment Architecture
+## 13. Deployment Architecture
 
 ### Infrastructure
 ```
@@ -750,65 +1164,12 @@ Mobile Apps (iOS/Android) → API Gateway → Backend
 - Production database
 - Full monitoring
 
-### EAS Build Configuration
-
-```json
-// eas.json
-{
-  "build": {
-    "production": {
-      "env": {
-        "EXPO_PUBLIC_ENVIRONMENT": "production"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "appleId": "your-apple-id@example.com"
-      }
-    }
-  }
-}
-```
-
 ---
 
-## 13. Construction Management System Implementation
+## 14. Construction Management System Implementation
 
-### 13.1 Construction Management Workflow Architecture
+### 14.1 AI Contract Generation
 
-The construction management system follows a state machine pattern with automated transitions:
-
-```typescript
-// Project state flow
-type ProjectState = 
-  | 'bid_accepted'        // Initial state
-  | 'contract_generation' // AI generating contract
-  | 'contract_review'     // Owner reviewing
-  | 'escrow_funding'      // Awaiting escrow deposit
-  | 'team_assembly'       // Sub-bidding phase
-  | 'active'              // Construction in progress
-  | 'dispute'             // Dispute filed
-  | 'final_inspection'    // Punch list phase
-  | 'completed'           // All done
-  | 'cancelled';          // Terminated
-
-// Milestone state flow
-type MilestoneState =
-  | 'not_started'
-  | 'in_progress'
-  | 'pending_review'      // Submitted, awaiting owner
-  | 'ai_reviewing'        // AI analyzing proof
-  | 'owner_reviewing'     // Owner reviewing
-  | 'approved'            // Payment released
-  | 'needs_revision'      // Rejected with feedback
-  | 'disputed';           // Formal dispute filed
-```
-
-### 13.2 AI Integration Requirements
-
-#### AI Contract Generation
 ```typescript
 // services/ai/contract-generation.ts
 import { generateObject } from '@rork/toolkit-sdk';
@@ -831,6 +1192,18 @@ const ContractSchema = z.object({
     })),
     exclusions: z.array(z.string()),
   }),
+  californiaProvisions: z.object({
+    licensingRequirements: z.array(z.string()),
+    mechanicsLienWarning: z.string(),
+    insuranceRequirements: z.array(z.string()),
+    paymentTerms: z.object({
+      schedule: z.array(z.object({
+        milestone: z.string(),
+        percentage: z.number()
+      })),
+      retainage: z.number()
+    })
+  }),
   paymentSchedule: z.object({
     milestones: z.array(z.object({
       name: z.string(),
@@ -847,24 +1220,45 @@ const ContractSchema = z.object({
   }),
 });
 
-export async function generateContract(bid: Bid): Promise<Contract> {
+export async function generateContract(
+  bid: Bid, 
+  ownerNotes: string
+): Promise<Contract> {
   const contract = await generateObject({
     messages: [{
       role: 'user',
-      content: `Generate a construction contract based on this bid:
-        Trade: ${bid.tradeType}
-        Scope: ${bid.description}
-        Budget: ${bid.amount}
-        Timeline: ${bid.timeline}
-        Location: ${bid.location}
+      content: `Generate a California-compliant construction contract based on:
         
-        Include:
-        - Detailed scope of work in CSI format
-        - Payment milestones (20-30% tranches)
-        - State-specific legal terms for ${bid.state}
-        - Standard AIA contract clauses
-        - Non-performance clauses
-        - Warranty provisions`
+        BID DETAILS:
+        - Trade: ${bid.tradeType}
+        - Scope: ${bid.description}
+        - Budget: $${bid.amount.toLocaleString()}
+        - Timeline: ${bid.timeline} days
+        - Location: ${bid.location}, California
+        
+        OWNER NOTES:
+        ${ownerNotes}
+        
+        REQUIREMENTS:
+        1. Detailed scope of work in CSI format
+        2. Payment milestones (20-30% tranches with retainage)
+        3. California Contractors State License Law provisions:
+           - License number requirements
+           - Mechanics lien warning (per CA Civil Code § 8118)
+           - Payment terms per CA Business & Professions Code § 7159
+           - Required insurance (workers' comp, liability)
+           - Right to cancel notice (3-day for home improvement)
+        4. Owner protections:
+           - Lien release requirements before payments
+           - Performance guarantees
+           - 1-year workmanship warranty
+        5. Contractor protections:
+           - Payment timeline guarantees
+           - Scope change procedures
+           - Suspension rights for non-payment
+        6. Standard AIA contract clauses
+        7. Dispute resolution (arbitration per CA law)
+        8. Force majeure provisions`
     }],
     schema: ContractSchema,
   });
@@ -873,94 +1267,11 @@ export async function generateContract(bid: Bid): Promise<Contract> {
 }
 ```
 
-### 13.1.1 California Contractor Law Requirements
+### 14.2 AI Progress Monitoring
 
-#### Legal Framework
-All contracts generated by the platform must comply with California construction law, including:
-
-**California Business & Professions Code § 7159 - Home Improvement Contracts:**
-- Written contract required for work over $500
-- Must include contractor's license number
-- Must include approximate start and completion dates
-- Must describe work to be performed and materials
-- Must include total contract price
-- Must include payment terms and schedule
-- Must contain notice of right to cancel (3 days)
-- Must be signed by both parties
-
-**California Civil Code § 8118 - Mechanics Lien Warning:**
-- Every contract must include mechanics lien warning:
-  "NOTICE TO OWNER: Under California law, contractors, subcontractors, 
-  laborers, suppliers, and others who provide work or materials to improve 
-  your property have a right to file a lien on your property to ensure payment. 
-  This means that after a court hearing, your property could be sold by a court 
-  officer and the proceeds used to pay for work done on your property. This can 
-  happen even if you have paid your contractor in full. To protect yourself, 
-  you should make checks payable jointly to the contractor and the subcontractors 
-  or material suppliers."
-
-**California Civil Code § 8800 - Payment Requirements:**
-- Progress payments must be clearly defined
-- Joint control provisions if applicable
-- Preliminary notice requirements
-- Final payment and retainage rules
-
-**Required Disclosures:**
-1. Contractor license verification notice
-2. Right to cancel notice (72 hours)
-3. Mechanics lien warning
-4. Insurance requirements notice
-5. How to file complaint with CSLB
-
-**Owner Protection Requirements:**
-- Contractor must provide proof of:
-  - Valid California contractor's license
-  - Workers' compensation insurance
-  - General liability insurance ($1M minimum)
-- Owner has right to:
-  - Demand lien releases before payments
-  - Cancel within 3 days (home improvement contracts)
-  - File complaint with CSLB
-  - Receive warranty (minimum 1 year on workmanship)
-
-**Contractor Protection Requirements:**
-- Payment schedule tied to milestones
-- Owner must provide site access
-- Change order procedures defined
-- Force majeure provisions
-- Dispute resolution procedures
-
-**Arbitration Requirements:**
-- Must follow California Code of Civil Procedure
-- Arbitration clause must be clear and conspicuous
-- Both parties must agree to arbitration
-- California arbitration rules apply
-
-#### Implementation in Project Setup
-The AI contract generation in `app/project-setup.tsx` includes:
-
-1. **Owner Notes Input Field:**
-   - Optional text area for owner to provide additional details
-   - Helps AI generate more accurate contracts
-   - Captures special requirements, materials, timeline considerations
-
-2. **California Law Integration:**
-   - All mandatory disclosures automatically included
-   - Contract template adapts to California requirements
-   - Includes all required notices and warnings
-   - Complies with payment and lien law
-
-3. **Legal Review Recommendation:**
-   - System recommends legal review for contracts over $50,000
-   - Provides option to send contract to attorney
-   - Links to CSLB verification website
-
----
-
-#### AI Progress Monitoring
 ```typescript
 // services/ai/progress-monitoring.ts
-import { generateObject, generateText } from '@rork/toolkit-sdk';
+import { generateObject } from '@rork/toolkit-sdk';
 
 const ProgressAnalysisSchema = z.object({
   workQuality: z.enum(['excellent', 'good', 'acceptable', 'poor']),
@@ -1011,530 +1322,10 @@ export async function analyzeProgressPhotos(
 
   return analysis;
 }
-
-export async function detectDelays(
-  project: Project,
-  milestones: Milestone[],
-  updates: ProgressUpdate[]
-): Promise<DelayAlert[]> {
-  const alerts: DelayAlert[] = [];
-
-  // Check missing updates
-  const lastUpdate = updates[0]?.createdAt;
-  if (lastUpdate && Date.now() - lastUpdate > 24 * 60 * 60 * 1000) {
-    alerts.push({
-      type: 'missing_update',
-      severity: 'medium',
-      message: 'No progress update posted in 24 hours',
-    });
-  }
-
-  // Check overdue milestones
-  for (const milestone of milestones) {
-    if (
-      milestone.status === 'in_progress' &&
-      new Date(milestone.dueDate) < new Date()
-    ) {
-      const daysOverdue = Math.floor(
-        (Date.now() - new Date(milestone.dueDate).getTime()) / (24 * 60 * 60 * 1000)
-      );
-      alerts.push({
-        type: 'milestone_overdue',
-        severity: daysOverdue > 5 ? 'high' : 'medium',
-        message: `Milestone "${milestone.name}" is ${daysOverdue} days overdue`,
-        milestoneId: milestone.id,
-      });
-    }
-  }
-
-  return alerts;
-}
 ```
 
-#### Auto-Generated Timeline
-```typescript
-// services/ai/timeline-generation.ts
-export async function generateProjectTimeline(
-  scope: ScopeOfWork,
-  startDate: Date
-): Promise<Timeline> {
-  const TimelineSchema = z.object({
-    phases: z.array(z.object({
-      name: z.string(),
-      startDay: z.number(),
-      durationDays: z.number(),
-      milestones: z.array(z.object({
-        name: z.string(),
-        dayOffset: z.number(),
-        paymentPercentage: z.number(),
-        dependencies: z.array(z.string()),
-        deliverables: z.array(z.string()),
-      })),
-    })),
-    criticalPath: z.array(z.string()),
-    totalDuration: z.number(),
-  });
+### 14.3 Payment Integration
 
-  const timeline = await generateObject({
-    messages: [{
-      role: 'user',
-      content: `Generate a construction project timeline:
-        
-        Scope: ${JSON.stringify(scope.phases)}
-        Start Date: ${startDate}
-        
-        Create:
-        - Phases with realistic durations
-        - Milestones with payment percentages (20-30% each)
-        - Task dependencies
-        - Critical path calculation
-        - Account for inspections and approvals`
-    }],
-    schema: TimelineSchema,
-  });
-
-  return timeline;
-}
-```
-
----
-
-### 13.3 Database Schema for Construction Management
-
-#### Projects Table (Enhanced)
-```sql
-CREATE TABLE projects (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  bid_id UUID NOT NULL REFERENCES bids(id),
-  job_id UUID REFERENCES jobs(id),
-  owner_id UUID NOT NULL REFERENCES users(id),
-  contractor_id UUID NOT NULL REFERENCES users(id),
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  status VARCHAR(50) DEFAULT 'setup',
-  start_date DATE,
-  end_date DATE,
-  actual_start_date DATE,
-  actual_end_date DATE,
-  total_amount DECIMAL(12, 2) NOT NULL,
-  paid_amount DECIMAL(12, 2) DEFAULT 0,
-  escrow_balance DECIMAL(12, 2) DEFAULT 0,
-  completion_percentage INTEGER DEFAULT 0,
-  ai_monitoring_enabled BOOLEAN DEFAULT true,
-  daily_updates_required BOOLEAN DEFAULT true,
-  last_update_at TIMESTAMP WITH TIME ZONE,
-  contract_generated_at TIMESTAMP WITH TIME ZONE,
-  contract_signed_at TIMESTAMP WITH TIME ZONE,
-  escrow_funded_at TIMESTAMP WITH TIME ZONE,
-  work_started_at TIMESTAMP WITH TIME ZONE,
-  completed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_projects_status ON projects(status);
-CREATE INDEX idx_projects_owner ON projects(owner_id);
-CREATE INDEX idx_projects_contractor ON projects(contractor_id);
-```
-
-#### Scope of Work Table
-```sql
-CREATE TABLE project_scope (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  version INTEGER DEFAULT 1,
-  work_breakdown JSONB NOT NULL,
-  materials JSONB,
-  requirements JSONB,
-  exclusions TEXT[],
-  approved_by_owner BOOLEAN DEFAULT false,
-  approved_by_contractor BOOLEAN DEFAULT false,
-  owner_signature TEXT,
-  contractor_signature TEXT,
-  owner_signed_at TIMESTAMP WITH TIME ZONE,
-  contractor_signed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### AI Contract Generation Table
-```sql
-CREATE TABLE ai_generated_contracts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  bid_id UUID NOT NULL REFERENCES bids(id),
-  generated_contract JSONB NOT NULL,
-  generation_time_ms INTEGER,
-  ai_model_version VARCHAR(50),
-  owner_edits JSONB,
-  contractor_edits JSONB,
-  final_contract JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-#### Contracts Table
-```sql
-CREATE TABLE project_contracts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  scope_id UUID REFERENCES project_scope(id),
-  contract_type VARCHAR(50) NOT NULL,
-  terms JSONB NOT NULL,
-  payment_schedule JSONB NOT NULL,
-  warranty_terms JSONB,
-  dispute_resolution JSONB,
-  insurance_requirements JSONB,
-  owner_signed BOOLEAN DEFAULT false,
-  contractor_signed BOOLEAN DEFAULT false,
-  owner_signature TEXT,
-  contractor_signature TEXT,
-  owner_signed_at TIMESTAMP WITH TIME ZONE,
-  contractor_signed_at TIMESTAMP WITH TIME ZONE,
-  fully_executed_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Milestones Table
-```sql
-CREATE TABLE project_milestones (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  due_date DATE NOT NULL,
-  payment_amount DECIMAL(12, 2) NOT NULL,
-  deliverables TEXT[],
-  acceptance_criteria TEXT[],
-  status VARCHAR(50) DEFAULT 'not_started',
-  order_number INTEGER NOT NULL,
-  depends_on UUID REFERENCES project_milestones(id),
-  submitted_at TIMESTAMP WITH TIME ZONE,
-  approved_at TIMESTAMP WITH TIME ZONE,
-  approved_by UUID REFERENCES users(id),
-  rejection_reason TEXT,
-  revision_count INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_milestones_project ON project_milestones(project_id);
-CREATE INDEX idx_milestones_status ON project_milestones(status);
-```
-
-#### AI Progress Analysis Table
-```sql
-CREATE TABLE ai_progress_analysis (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  milestone_id UUID NOT NULL REFERENCES project_milestones(id),
-  progress_update_id UUID REFERENCES progress_updates(id),
-  analysis_result JSONB NOT NULL,
-  work_quality VARCHAR(50),
-  completion_percentage INTEGER,
-  issues_detected JSONB,
-  recommendations TEXT[],
-  compliance_check JSONB,
-  analyzed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_ai_analysis_milestone ON ai_progress_analysis(milestone_id);
-
-#### Progress Updates Table (Enhanced)
-```sql
-CREATE TABLE progress_updates (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  milestone_id UUID REFERENCES project_milestones(id),
-  contractor_id UUID NOT NULL REFERENCES users(id),
-  update_type VARCHAR(50) DEFAULT 'daily',
-  work_completed TEXT,
-  work_planned TEXT,
-  issues TEXT,
-  hours_worked DECIMAL(5, 2),
-  crew_members INTEGER,
-  photos TEXT[],
-  videos TEXT[],
-  gps_location JSONB,
-  weather_conditions VARCHAR(100),
-  ai_analyzed BOOLEAN DEFAULT false,
-  ai_analysis_id UUID REFERENCES ai_progress_analysis(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_progress_updates_project ON progress_updates(project_id);
-```
-
-#### Payments & Escrow Table
-```sql
-CREATE TABLE project_payments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  milestone_id UUID REFERENCES project_milestones(id),
-  payment_type VARCHAR(50) NOT NULL,
-  amount DECIMAL(12, 2) NOT NULL,
-  status VARCHAR(50) DEFAULT 'pending',
-  payment_method VARCHAR(50),
-  transaction_id VARCHAR(255),
-  paid_by UUID REFERENCES users(id),
-  paid_to UUID REFERENCES users(id),
-  escrow_held BOOLEAN DEFAULT false,
-  released_at TIMESTAMP WITH TIME ZONE,
-  invoice_url TEXT,
-  receipt_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_payments_project ON project_payments(project_id);
-```
-
-#### Change Orders Table
-```sql
-CREATE TABLE change_orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  scope_id UUID REFERENCES project_scope(id),
-  requested_by UUID NOT NULL REFERENCES users(id),
-  title VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  reason TEXT,
-  cost_impact DECIMAL(12, 2),
-  timeline_impact INTEGER,
-  documentation JSONB,
-  status VARCHAR(50) DEFAULT 'pending',
-  approved_by_owner BOOLEAN DEFAULT false,
-  approved_by_contractor BOOLEAN DEFAULT false,
-  owner_signature TEXT,
-  contractor_signature TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  approved_at TIMESTAMP WITH TIME ZONE
-);
-```
-
-#### Timeline & Alerts Table
-```sql
-CREATE TABLE project_timelines (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  ai_generated BOOLEAN DEFAULT true,
-  phases JSONB NOT NULL,
-  critical_path JSONB,
-  total_duration_days INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE project_alerts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  alert_type VARCHAR(50) NOT NULL,
-  severity VARCHAR(20) NOT NULL,
-  message TEXT NOT NULL,
-  metadata JSONB,
-  acknowledged BOOLEAN DEFAULT false,
-  acknowledged_by UUID REFERENCES users(id),
-  acknowledged_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_alerts_project ON project_alerts(project_id);
-CREATE INDEX idx_alerts_severity ON project_alerts(severity);
-
-#### Disputes Table (Enhanced)
-```sql
-CREATE TABLE disputes (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  milestone_id UUID REFERENCES project_milestones(id),
-  filed_by UUID NOT NULL REFERENCES users(id),
-  dispute_type VARCHAR(50) NOT NULL,
-  description TEXT NOT NULL,
-  evidence JSONB,
-  amount_disputed DECIMAL(12, 2),
-  desired_resolution TEXT,
-  status VARCHAR(50) DEFAULT 'filed',
-  resolution_stage VARCHAR(50) DEFAULT 'internal',
-  chat_logs JSONB,
-  flagged_clauses TEXT[],
-  auto_generated_demand_letter TEXT,
-  admin_assigned UUID REFERENCES users(id),
-  resolution TEXT,
-  resolved_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_disputes_project ON disputes(project_id);
-CREATE INDEX idx_disputes_status ON disputes(status);
-```
-
-#### Approvals Table
-```sql
-CREATE TABLE milestone_approvals (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  milestone_id UUID NOT NULL REFERENCES project_milestones(id) ON DELETE CASCADE,
-  reviewer_id UUID NOT NULL REFERENCES users(id),
-  decision VARCHAR(50) NOT NULL,
-  comments TEXT,
-  issues_found TEXT[],
-  photos TEXT[],
-  reviewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Project Documents Table
-```sql
-CREATE TABLE project_documents (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  document_type VARCHAR(50) NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  file_url TEXT NOT NULL,
-  file_size INTEGER,
-  mime_type VARCHAR(100),
-  uploaded_by UUID NOT NULL REFERENCES users(id),
-  milestone_id UUID REFERENCES project_milestones(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
----
-
-#### Sub-Contractor Bids Table
-```sql
-CREATE TABLE sub_contractor_bids (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  trade_type VARCHAR(100) NOT NULL,
-  scope_description TEXT NOT NULL,
-  bidder_id UUID NOT NULL REFERENCES users(id),
-  bid_amount DECIMAL(12, 2) NOT NULL,
-  timeline_days INTEGER,
-  proposal TEXT,
-  qualifications JSONB,
-  status VARCHAR(50) DEFAULT 'submitted',
-  selected BOOLEAN DEFAULT false,
-  selected_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX idx_sub_bids_project ON sub_contractor_bids(project_id);
-
-#### Role Assignments Table
-```sql
-CREATE TABLE project_role_assignments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id),
-  role VARCHAR(50) NOT NULL,
-  permissions JSONB NOT NULL,
-  assigned_by UUID REFERENCES users(id),
-  assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(project_id, user_id)
-);
-
-CREATE INDEX idx_role_assignments_project ON project_role_assignments(project_id);
-
----
-
-### 13.4 API Endpoints for Construction Management
-
-#### Project Endpoints
-```typescript
-// POST /projects - Create project from accepted bid
-// GET /projects - Get all projects for user
-// GET /projects/:id - Get project details
-// PATCH /projects/:id - Update project
-// DELETE /projects/:id - Cancel project
-
-// Scope of Work
-// POST /projects/:id/scope - Create scope of work
-// GET /projects/:id/scope - Get current scope
-// PATCH /projects/:id/scope/:scopeId - Update scope
-// POST /projects/:id/scope/:scopeId/sign - Sign scope
-
-// Contracts
-// POST /projects/:id/contracts - Create contract
-// GET /projects/:id/contracts/:contractId - Get contract
-// POST /projects/:id/contracts/:contractId/sign - Sign contract
-
-// Milestones
-// POST /projects/:id/milestones - Create milestone
-// GET /projects/:id/milestones - Get all milestones
-// PATCH /projects/:id/milestones/:milestoneId - Update milestone
-// POST /projects/:id/milestones/:milestoneId/submit - Submit for review
-// POST /projects/:id/milestones/:milestoneId/approve - Approve milestone
-// POST /projects/:id/milestones/:milestoneId/reject - Reject milestone
-
-// Progress Updates
-// POST /projects/:id/updates - Create progress update
-// GET /projects/:id/updates - Get all updates
-// GET /projects/:id/updates/:updateId - Get specific update
-
-// Payments
-// POST /projects/:id/payments/deposit - Deposit to escrow
-// GET /projects/:id/payments - Get payment history
-// POST /projects/:id/payments/:paymentId/release - Release payment
-
-// Change Orders
-// POST /projects/:id/change-orders - Create change order
-// GET /projects/:id/change-orders - Get all change orders
-// POST /projects/:id/change-orders/:orderId/approve - Approve change order
-// POST /projects/:id/change-orders/:orderId/reject - Reject change order
-
-// Disputes
-// POST /projects/:id/disputes - File dispute
-// GET /projects/:id/disputes - Get all disputes
-// POST /projects/:id/disputes/:disputeId/respond - Respond to dispute
-// PATCH /projects/:id/disputes/:disputeId - Update dispute status
-
-// Completion
-// POST /projects/:id/complete - Mark project complete
-// POST /projects/:id/punch-list - Create punch list
-// POST /projects/:id/final-approval - Final approval
-```
-
----
-
-### 13.3 Context/State Management
-
-#### ProjectsContext
-```typescript
-// contexts/ProjectsContext.tsx
-export const [ProjectsContext, useProjects] = createContextHook(() => {
-  const queryClient = useQueryClient();
-
-  const projectsQuery = useQuery({
-    queryKey: ['projects'],
-    queryFn: projectsApi.fetchProjects,
-  });
-
-  const createProjectMutation = useMutation({
-    mutationFn: projectsApi.createProject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    },
-  });
-
-  return {
-    projects: projectsQuery.data || [],
-    isLoading: projectsQuery.isLoading,
-    createProject: createProjectMutation.mutate,
-  };
-});
-
-// Custom hooks for filtered data
-export function useActiveProjects() {
-  const { projects } = useProjects();
-  return useMemo(
-    () => projects.filter(p => p.status === 'active'),
-    [projects]
-  );
-}
-```
-
----
-
-### 13.4 Payment Integration
-
-#### Stripe Integration
 ```typescript
 // services/payments/stripe.ts
 import Stripe from 'stripe';
@@ -1570,143 +1361,6 @@ export const releaseMilestonePayment = async (
 };
 ```
 
-#### Alternative: Payment Provider Agnostic
-```typescript
-// services/payments/interface.ts
-export interface PaymentProvider {
-  createEscrow(projectId: string, amount: number): Promise<PaymentIntent>;
-  releasePayment(milestoneId: string, amount: number): Promise<Transfer>;
-  refund(paymentId: string, amount: number): Promise<Refund>;
-  holdFunds(disputeId: string, amount: number): Promise<Hold>;
-}
-
-// Support multiple providers: Stripe, PayPal, Square, etc.
-```
-
----
-
-### 13.5 E-Signature Integration
-
-#### DocuSign Integration
-```typescript
-// services/signatures/docusign.ts
-import docusign from 'docusign-esign';
-
-export const sendForSignature = async (
-  documentData: {
-    projectId: string;
-    documentType: 'scope' | 'contract';
-    ownerEmail: string;
-    contractorEmail: string;
-    documentUrl: string;
-  }
-) => {
-  const envelope = {
-    emailSubject: `Sign ${documentData.documentType} for project`,
-    documents: [{
-      documentBase64: await fetchDocumentBase64(documentData.documentUrl),
-      name: `${documentData.documentType}.pdf`,
-      fileExtension: 'pdf',
-    }],
-    recipients: {
-      signers: [
-        {
-          email: documentData.ownerEmail,
-          name: 'Owner',
-          recipientId: '1',
-          routingOrder: '1',
-        },
-        {
-          email: documentData.contractorEmail,
-          name: 'Contractor',
-          recipientId: '2',
-          routingOrder: '2',
-        },
-      ],
-    },
-  };
-
-  return await docusignApi.createEnvelope(envelope);
-};
-```
-
----
-
-### 13.6 File Storage Structure
-
-```
-storage/
-├── projects/
-│   ├── {projectId}/
-│   │   ├── scope/
-│   │   │   ├── v1.pdf
-│   │   │   ├── v2.pdf
-│   │   ├── contracts/
-│   │   │   ├── contract.pdf
-│   │   │   ├── signed-contract.pdf
-│   │   ├── milestones/
-│   │   │   ├── {milestoneId}/
-│   │   │   │   ├── proof/
-│   │   │   │   │   ├── photo-1.jpg
-│   │   │   │   │   ├── photo-2.jpg
-│   │   │   │   ├── documents/
-│   │   │   │   │   ├── invoice.pdf
-│   │   ├── progress/
-│   │   │   ├── {date}/
-│   │   │   │   ├── update-photos/
-│   │   │   │   │   ��── 1.jpg
-│   │   │   │   ├── videos/
-│   │   ├── change-orders/
-│   │   │   ├── {changeOrderId}/
-│   │   │   │   ├── documentation.pdf
-│   │   ├── disputes/
-│   │   │   ├── {disputeId}/
-│   │   │   │   ├── evidence/
-│   │   ├── completion/
-│   │   │   ├── final-photos/
-│   │   │   ├── warranties/
-│   │   │   ├── certificates/
-```
-
----
-
-### 13.7 Real-Time Updates
-
-```typescript
-// services/realtime-projects.ts
-export const subscribeToProject = (
-  projectId: string,
-  callbacks: {
-    onMilestoneUpdate: (milestone: Milestone) => void;
-    onProgressUpdate: (update: ProgressUpdate) => void;
-    onPaymentUpdate: (payment: Payment) => void;
-    onDisputeUpdate: (dispute: Dispute) => void;
-  }
-) => {
-  const subscription = supabase
-    .channel(`project:${projectId}`)
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'project_milestones',
-      filter: `project_id=eq.${projectId}`,
-    }, (payload) => {
-      callbacks.onMilestoneUpdate(payload.new as Milestone);
-    })
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'progress_updates',
-      filter: `project_id=eq.${projectId}`,
-    }, (payload) => {
-      callbacks.onProgressUpdate(payload.new as ProgressUpdate);
-    })
-    .subscribe();
-
-  return () => subscription.unsubscribe();
-};
-```
-
 ---
 
 ## 15. Notification System
@@ -1720,105 +1374,21 @@ The application supports 55+ notification types across all features:
 - **new_application**: New application received for a job
 - **application_accepted**: Application was accepted
 - **application_rejected**: Application was rejected
-- **application_withdrawn**: Applicant withdrew their application
 - **job_updated**: Job details were modified
 - **job_cancelled**: Job was cancelled by poster
 
-#### Estimate & Appointment Notifications
-- **estimate_requested**: Site estimate requested
-- **estimate_confirmed**: Estimate appointment confirmed
-- **estimate_reminder**: Reminder for upcoming estimate (24h before)
-- **estimate_completed**: Estimate appointment was completed
-- **estimate_cancelled**: Estimate was cancelled
-- **appointment_scheduled**: New appointment scheduled
-- **appointment_confirmed**: Appointment confirmed by other party
-- **appointment_reminder**: Reminder for upcoming appointment (24h before)
-- **appointment_cancelled**: Appointment was cancelled
-- **appointment_rescheduled**: Appointment time changed
-
-#### Messaging Notifications
-- **new_message**: New message received in conversation
-
-#### Bidding Notifications
-- **bid_invitation**: Invited to submit bid
-- **bid_submitted**: Bid was submitted successfully
-- **bid_accepted**: Bid was accepted (triggers project creation)
-- **bid_rejected**: Bid was not selected
-- **bid_updated**: Bid details were modified
-
 #### Project Management Notifications
 - **project_created**: New project created from accepted bid
-- **project_started**: Project work has officially started
-- **project_completed**: Project marked as complete
-
-#### Milestone Notifications
-- **milestone_created**: New milestone added to project
 - **milestone_submitted**: Contractor submitted milestone for review
 - **milestone_approved**: Owner approved milestone completion
 - **milestone_rejected**: Owner rejected milestone (needs revision)
 - **milestone_payment_released**: Payment released for approved milestone
-
-#### Payment & Escrow Notifications
-- **payment_received**: Payment received successfully
-- **payment_sent**: Payment sent successfully
-- **payment_failed**: Payment transaction failed
-- **escrow_deposited**: Funds deposited into project escrow
-- **escrow_released**: Funds released from escrow
-
-#### Change Order Notifications
-- **change_order_requested**: Change order submitted
-- **change_order_approved**: Change order approved
-- **change_order_rejected**: Change order rejected
-
-#### Dispute Notifications
-- **dispute_filed**: New dispute filed
-- **dispute_resolved**: Dispute was resolved
-- **dispute_escalated**: Dispute escalated to higher level
-
-#### Progress & Document Notifications
-- **progress_update_posted**: Daily progress update posted
-- **progress_update_late**: Progress update is overdue
 - **contract_ready**: Contract generated and ready for review
 - **contract_signed**: All parties signed the contract
-- **document_uploaded**: New document uploaded to project
-- **document_approval_needed**: Document requires approval
-
-#### Inspection Notifications
-- **inspection_scheduled**: Inspection appointment scheduled
-- **inspection_completed**: Inspection completed
-
-#### Team Notifications
-- **team_member_added**: New member added to project team
-- **team_member_removed**: Member removed from project team
-
-#### System & Alert Notifications
-- **system_alert**: Important system message
-- **deadline_approaching**: Project deadline approaching (3 days)
-- **deadline_missed**: Project deadline was missed
+- **progress_update_posted**: Daily progress update posted
+- **dispute_filed**: New dispute filed
 
 ### 15.2 Notification Priorities
-
-Notifications are categorized by priority level:
-
-**Low Priority:**
-- Progress updates
-- Document uploads (non-critical)
-- Team member changes
-- General system alerts
-
-**Normal Priority:**
-- New jobs matching criteria
-- New applications
-- Appointment reminders
-- Bid submissions
-- Progress reports
-
-**High Priority:**
-- Application accepted/rejected
-- Milestone submitted for review
-- Change order requests
-- Escrow deposits
-- Deadlines approaching
 
 **Critical Priority:**
 - Payment failures
@@ -1826,245 +1396,29 @@ Notifications are categorized by priority level:
 - Contract signing required
 - Deadlines missed
 - Safety issues
-- Project cancellations
 
-### 15.3 Notification Delivery
+**High Priority:**
+- Application accepted/rejected
+- Milestone submitted for review
+- Escrow deposits
+- Deadlines approaching
 
-#### In-App Notifications
-All notifications appear in the notification bell icon with unread badge count.
+**Normal Priority:**
+- New jobs matching criteria
+- New applications
+- Progress reports
 
-#### Real-Time Updates
-Notifications are delivered immediately via:
-- WebSocket connections (when implemented)
-- Context state updates
-- UI badge updates
-
-#### Notification Grouping
-Notifications are grouped by time period:
-- Today
-- Yesterday
-- This Week
-- Older
-
-### 15.4 Notification Actions
-
-Each notification can have an action URL that navigates to:
-- Job details page
-- Application details
-- Appointment details
-- Bid details
-- Project dashboard
-- Milestone details
-- Dispute resolution page
-- Messages/conversation
-
-### 15.5 Notification Management
-
-Users can:
-- View all notifications
-- Mark individual notifications as read
-- Mark all notifications as read
-- Delete individual notifications
-- Delete all notifications
-- Filter by type (future enhancement)
-- Filter by priority (future enhancement)
-
-### 15.6 Notification Triggers
-
-```typescript
-// Example: When application is accepted
-const handleAcceptApplication = async (applicationId: string) => {
-  await updateApplication(applicationId, { status: 'accepted' });
-  
-  // Notify applicant
-  addNotification({
-    type: 'application_accepted',
-    title: 'Application Accepted!',
-    message: `Your application for "${job.title}" has been accepted.`,
-    priority: 'high',
-    jobId: job.id,
-    applicationId: applicationId,
-  });
-};
-
-// Example: When milestone is submitted
-const handleSubmitMilestone = async (milestoneId: string) => {
-  await updateMilestone(milestoneId, { status: 'pending_review' });
-  
-  // Notify owner
-  addNotification({
-    type: 'milestone_submitted',
-    title: 'Milestone Ready for Review',
-    message: `"${milestone.title}" has been submitted for your approval.`,
-    priority: 'high',
-    projectId: milestone.projectId,
-    milestoneId: milestoneId,
-  });
-};
-
-// Example: When payment is released
-const handleReleasePayment = async (milestoneId: string, amount: number) => {
-  await releaseMilestonePayment(milestoneId, amount);
-  
-  // Notify contractor
-  addNotification({
-    type: 'milestone_payment_released',
-    title: 'Payment Released',
-    message: `${amount.toLocaleString()} has been released for milestone completion.`,
-    priority: 'high',
-    projectId: milestone.projectId,
-    milestoneId: milestoneId,
-  });
-};
-```
-
-### 15.7 Notification Storage
-
-Notifications are stored:
-- **Frontend**: AsyncStorage (up to 100 per user)
-- **Backend**: PostgreSQL notifications table (permanent)
-- **Cleanup**: Old notifications pruned after 90 days
-
-### 15.8 Future Enhancements
-
-- [ ] Push notifications (iOS/Android)
-- [ ] Email notifications (digest)
-- [ ] SMS notifications (critical only)
-- [ ] Notification preferences per type
-- [ ] Do Not Disturb schedule
-- [ ] Notification sound customization
-- [ ] Grouped notifications by project
-- [ ] Notification search
-- [ ] Export notification history
+**Low Priority:**
+- Progress updates
+- Document uploads (non-critical)
+- General system alerts
 
 ---
 
-### 13.8 Notification Rules (Project Specific)
-
-```typescript
-// Project notification triggers
-const projectNotifications = {
-  // To Owner
-  'milestone.submitted': {
-    recipient: 'owner',
-    title: 'Milestone Ready for Review',
-    priority: 'high',
-  },
-  'progress.updated': {
-    recipient: 'owner',
-    title: 'Progress Update Posted',
-    priority: 'normal',
-  },
-  'change_order.requested': {
-    recipient: 'owner',
-    title: 'Change Order Requested',
-    priority: 'high',
-  },
-  
-  // To Contractor
-  'milestone.approved': {
-    recipient: 'contractor',
-    title: 'Milestone Approved',
-    priority: 'high',
-  },
-  'milestone.rejected': {
-    recipient: 'contractor',
-    title: 'Milestone Needs Revision',
-    priority: 'high',
-  },
-  'payment.released': {
-    recipient: 'contractor',
-    title: 'Payment Released',
-    priority: 'high',
-  },
-  
-  // To Both
-  'dispute.filed': {
-    recipient: 'both',
-    title: 'Dispute Filed',
-    priority: 'critical',
-  },
-  'change_order.approved': {
-    recipient: 'both',
-    title: 'Change Order Approved',
-    priority: 'high',
-  },
-};
-```
-
----
-
-### 13.9 Security & Permissions
-
-#### Row Level Security Policies
-```sql
--- Projects: Users can only see their own projects
-CREATE POLICY "Users can view own projects" ON projects
-  FOR SELECT USING (
-    owner_id = auth.uid() OR contractor_id = auth.uid()
-  );
-
--- Milestones: Read if part of project
-CREATE POLICY "Project participants can view milestones" ON project_milestones
-  FOR SELECT USING (
-    project_id IN (
-      SELECT id FROM projects 
-      WHERE owner_id = auth.uid() OR contractor_id = auth.uid()
-    )
-  );
-
--- Contractor can update milestones
-CREATE POLICY "Contractor can update milestones" ON project_milestones
-  FOR UPDATE USING (
-    project_id IN (
-      SELECT id FROM projects WHERE contractor_id = auth.uid()
-    )
-  );
-
--- Owner can approve/reject
-CREATE POLICY "Owner can approve milestones" ON milestone_approvals
-  FOR INSERT WITH CHECK (
-    milestone_id IN (
-      SELECT m.id FROM project_milestones m
-      JOIN projects p ON m.project_id = p.id
-      WHERE p.owner_id = auth.uid()
-    )
-  );
-```
-
----
-
-### 13.10 Admin Dashboard Requirements
-
-#### Project Management (Admin)
-- View all active projects
-- Monitor project health (on-time, at-risk, delayed)
-- View escrow balances
-- Manage disputes:
-  - Assign to admin mediator
-  - Review evidence
-  - Make decisions
-  - Track resolution progress
-- Payment oversight:
-  - View all transactions
-  - Manual payment release (if needed)
-  - Refund processing
-  - Hold/freeze payments
-- Change order approval (if policy requires)
-- Force project completion/cancellation
-- Generate reports:
-  - Projects by status
-  - Payment analytics
-  - Dispute resolution metrics
-  - Average project duration
-  - Milestone approval rates
-
----
-
-## 14. Development Roadmap
+## 16. Development Roadmap
 
 ### Phase 1: Backend Setup
-- [ ] Choose backend technology
+- [ ] Choose backend technology (Supabase recommended)
 - [ ] Set up database schema (including project management tables)
 - [ ] Configure authentication
 - [ ] Implement RLS policies
@@ -2093,84 +1447,102 @@ CREATE POLICY "Owner can approve milestones" ON milestone_approvals
 ### Phase 4: Project Management System
 - [ ] Database schema for projects, milestones, payments
 - [ ] Project creation from accepted bids
-- [ ] Scope of work management
-- [ ] Contract generation and signing
+- [ ] AI contract generation with California law provisions
 - [ ] Milestone management
-- [ ] Progress tracking
+- [ ] Progress tracking with AI analysis
 - [ ] Photo/video uploads
 - [ ] Approval/rejection workflow
 - [ ] Change order system
 
 ### Phase 5: Payment & Escrow
-- [ ] Choose payment provider (Stripe recommended)
-- [ ] Set up payment processing
-- [ ] Implement escrow system
+- [ ] Stripe integration
+- [ ] Escrow system
 - [ ] Milestone-based payment release
 - [ ] Invoice generation
-- [ ] Receipt generation
 - [ ] Payment notifications
-- [ ] Refund processing
 
 ### Phase 6: Dispute Resolution
 - [ ] Dispute filing system
 - [ ] Evidence upload
-- [ ] Communication threads for disputes
 - [ ] Admin mediation dashboard
 - [ ] Resolution workflow
-- [ ] Payment holds during disputes
-- [ ] Resolution notifications
 
-### Phase 7: E-Signatures & Legal
-- [ ] Choose e-signature provider (DocuSign/HelloSign)
-- [ ] Contract template system
-- [ ] Digital signature integration
-- [ ] Document version control
-- [ ] Signed document storage
-- [ ] Lien waiver generation
-- [ ] Compliance documentation
-
-### Phase 8: Production Ready
+### Phase 7: Production Ready
 - [ ] Fix all bugs
 - [ ] Error tracking (Sentry)
 - [ ] Analytics setup
 - [ ] Performance optimization
-- [ ] Documentation
-- [ ] Device testing
 - [ ] Security audit
-- [ ] Payment gateway testing
+- [ ] Device testing
 
-### Phase 9: Deployment
+### Phase 8: Deployment
 - [ ] Configure EAS builds
 - [ ] Build iOS and Android
-- [ ] App Store listing
-- [ ] Google Play listing
-- [ ] Submit for review
+- [ ] App Store submission
+- [ ] Google Play submission
 - [ ] Deploy web app
 - [ ] Monitoring setup
-- [ ] Payment provider production setup
 
 ---
 
 ## Development Commands
 
 ```bash
-# Start development
+# Start development with tunnel (mobile testing)
 bun run start
 
-# Start web preview
+# Start web preview with tunnel
 bun run start-web
+
+# Start web preview with debug logs
+bun run start-web-dev
 
 # Run linter
 bun run lint
 
-# Build for production
+# Clear cache and restart
+bunx expo start --clear
+
+# Install dependencies
+bun install
+
+# Install a new package (use Expo-compatible version)
+bun expo install <package-name>
+
+# Build for production (requires EAS CLI setup)
 eas build --platform all --profile production
 
-# Submit to stores
+# Submit to stores (requires EAS CLI setup)
 eas submit --platform ios
 eas submit --platform android
 ```
 
 ---
 
-This technical requirements document provides the complete technical specification for implementing and deploying the Bidroom Construction Platform. Use in conjunction with the Functional Requirements document for full project scope.
+## Critical Development Notes
+
+### DO NOT Install @rork/toolkit-sdk
+The `@rork/toolkit-sdk` is globally available via TypeScript path mapping in the Rork environment. It will NOT appear in package.json, bun.lock, or node_modules. Simply import and use it directly.
+
+### Use Bun as Package Manager
+This project uses Bun for package management. Always use `bun install` and `bun expo install` instead of npm or yarn.
+
+### Testing on Mobile Devices
+1. Download Rork app (iOS) or Expo Go (Android)
+2. Run `bun run start`
+3. Scan QR code from development server
+4. Test features in real-time
+
+### Web Compatibility
+Always test features on web (`bun run start-web`) to ensure cross-platform compatibility. Some native features may need web fallbacks.
+
+### AI Features
+Leverage Rork's built-in AI capabilities for:
+- Contract generation with legal provisions
+- Progress photo analysis
+- Timeline generation
+- Dispute resolution assistance
+
+---
+
+This technical requirements document provides the complete technical specification for implementing and deploying the Bidroom Construction Platform in Rork. Use in conjunction with the Functional Requirements document for full project scope.
