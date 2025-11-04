@@ -23,12 +23,17 @@ import {
   Shield,
   CheckCircle,
   TrendingUp,
+  Heart,
+  Share2,
+  Flag,
 } from "lucide-react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import Colors from "@/constants/colors";
 import { mockContractors } from "@/mocks/data";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppointments } from "@/contexts/AppointmentsContext";
+import { useSavedContractors } from "@/contexts/SavedContractorsContext";
+import { Share, Platform } from "react-native";
 import TrustSuggestions from "@/components/TrustSuggestions";
 import VerificationBadge from "@/components/VerificationBadge";
 import ReviewsList from "@/components/ReviewsList";
@@ -73,7 +78,9 @@ export default function ContractorProfileScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const { createAppointment } = useAppointments();
+  const { isSaved, saveContractor, unsaveContractor } = useSavedContractors();
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const contractorId = Array.isArray(id) ? id[0] : id;
   const contractor = mockContractors.find((c) => c.id === contractorId);
@@ -107,6 +114,52 @@ export default function ContractorProfileScreen() {
           },
           headerTintColor: Colors.text,
           headerShadowVisible: false,
+          headerRight: () => (
+            <View style={{ flexDirection: "row" as const, gap: 12, marginRight: 8 }}>
+              <TouchableOpacity 
+                onPress={() => {
+                  if (isSaved(contractor.id)) {
+                    unsaveContractor(contractor.id);
+                    Alert.alert("Removed", "Contractor removed from favorites");
+                  } else {
+                    saveContractor(contractor.id);
+                    Alert.alert("Saved", "Contractor saved to favorites");
+                  }
+                }}
+              >
+                <Heart 
+                  size={22} 
+                  color={isSaved(contractor.id) ? Colors.error : Colors.text}
+                  fill={isSaved(contractor.id) ? Colors.error : "none"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    if (Platform.OS === "web") {
+                      await navigator.share({
+                        title: `${contractor.name} - ${contractor.company}`,
+                        text: `Check out ${contractor.name} on BuildConnect!`,
+                        url: window.location.href,
+                      });
+                    } else {
+                      await Share.share({
+                        message: `Check out ${contractor.name} from ${contractor.company} on BuildConnect!`,
+                        title: `${contractor.name} - ${contractor.company}`,
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Share failed:", error);
+                  }
+                }}
+              >
+                <Share2 size={22} color={Colors.text} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowReportModal(true)}>
+                <Flag size={22} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+          ),
         }}
       />
 
@@ -274,6 +327,43 @@ export default function ContractorProfileScreen() {
             />
           </View>
         )}
+
+        {contractor.availability && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Availability</Text>
+            <Text style={styles.availabilityText}>
+              Next Available: {new Date(contractor.availability.nextAvailable || "").toLocaleDateString()}
+            </Text>
+            <View style={styles.calendarGrid}>
+              {contractor.availability.calendar.slice(0, 7).map((day) => (
+                <View key={day.date} style={styles.calendarDay}>
+                  <Text style={styles.calendarDayName}>
+                    {new Date(day.date).toLocaleDateString("en-US", { weekday: "short" })}
+                  </Text>
+                  <View
+                    style={[
+                      styles.calendarDayIndicator,
+                      day.available
+                        ? styles.calendarDayAvailable
+                        : styles.calendarDayUnavailable,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.calendarDayNumber,
+                        day.available
+                          ? styles.calendarDayNumberAvailable
+                          : styles.calendarDayNumberUnavailable,
+                      ]}
+                    >
+                      {new Date(day.date).getDate()}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -324,6 +414,21 @@ export default function ContractorProfileScreen() {
             console.error("Failed to create appointment:", error);
             Alert.alert("Error", "Failed to send estimate request");
           }
+        }}
+      />
+
+      <ReportModal
+        visible={showReportModal}
+        contractor={contractor}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={async (data) => {
+          console.log("Report submitted:", data);
+          Alert.alert(
+            "Report Submitted",
+            "Thank you for your report. We will review it shortly.",
+            [{ text: "OK" }]
+          );
+          setShowReportModal(false);
         }}
       />
     </View>
@@ -472,6 +577,129 @@ function RequestEstimateModal({
             <Calendar size={20} color={Colors.white} />
             <Text style={styles.submitButtonText}>
               {submitting ? "Sending..." : "Send Request"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
+function ReportModal({
+  visible,
+  contractor,
+  onClose,
+  onSubmit,
+}: {
+  visible: boolean;
+  contractor: any;
+  onClose: () => void;
+  onSubmit: (data: { reason: string; description: string }) => Promise<void>;
+}) {
+  const [reason, setReason] = useState("inappropriate");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const reasons = [
+    { value: "inappropriate", label: "Inappropriate Content" },
+    { value: "scam", label: "Suspected Scam" },
+    { value: "fake_profile", label: "Fake Profile" },
+    { value: "harassment", label: "Harassment" },
+    { value: "other", label: "Other" },
+  ];
+
+  const handleSubmit = async () => {
+    if (!description.trim()) {
+      Alert.alert("Error", "Please provide a description");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await onSubmit({ reason, description });
+      setReason("inappropriate");
+      setDescription("");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Report Contractor</Text>
+          <TouchableOpacity onPress={onClose}>
+            <X size={24} color={Colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          style={styles.modalContent}
+          contentContainerStyle={styles.modalContentInner}
+        >
+          <View style={styles.modalContractorInfo}>
+            <Text style={styles.modalInfoLabel}>Reporting:</Text>
+            <Text style={styles.modalInfoValue}>{contractor.name}</Text>
+            <Text style={styles.modalInfoCompany}>{contractor.company}</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Reason *</Text>
+            {reasons.map((r) => (
+              <TouchableOpacity
+                key={r.value}
+                style={[
+                  styles.reasonOption,
+                  reason === r.value && styles.reasonOptionActive,
+                ]}
+                onPress={() => setReason(r.value)}
+              >
+                <View
+                  style={[
+                    styles.radio,
+                    reason === r.value && styles.radioActive,
+                  ]}
+                >
+                  {reason === r.value && <View style={styles.radioDot} />}
+                </View>
+                <Text
+                  style={[
+                    styles.reasonText,
+                    reason === r.value && styles.reasonTextActive,
+                  ]}
+                >
+                  {r.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Description *</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Please describe the issue..."  
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={8}
+              textAlignVertical="top"
+              placeholderTextColor={Colors.textTertiary}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              submitting && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={submitting}
+          >
+            <Flag size={20} color={Colors.white} />
+            <Text style={styles.submitButtonText}>
+              {submitting ? "Submitting..." : "Submit Report"}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -942,5 +1170,91 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textSecondary,
     textAlign: "center" as const,
+  },
+  availabilityText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 16,
+  },
+  calendarGrid: {
+    flexDirection: "row" as const,
+    gap: 8,
+  },
+  calendarDay: {
+    flex: 1,
+    alignItems: "center" as const,
+  },
+  calendarDayName: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 8,
+    fontWeight: "600" as const,
+  },
+  calendarDayIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 2,
+  },
+  calendarDayAvailable: {
+    backgroundColor: Colors.success + "15",
+    borderColor: Colors.success,
+  },
+  calendarDayUnavailable: {
+    backgroundColor: Colors.border,
+    borderColor: Colors.border,
+  },
+  calendarDayNumber: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+  },
+  calendarDayNumberAvailable: {
+    color: Colors.success,
+  },
+  calendarDayNumberUnavailable: {
+    color: Colors.textTertiary,
+  },
+  reasonOption: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    marginBottom: 8,
+  },
+  reasonOptionActive: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + "10",
+  },
+  radio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginRight: 12,
+  },
+  radioActive: {
+    borderColor: Colors.primary,
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.primary,
+  },
+  reasonText: {
+    fontSize: 15,
+    color: Colors.text,
+  },
+  reasonTextActive: {
+    fontWeight: "600" as const,
+    color: Colors.primary,
   },
 });

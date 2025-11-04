@@ -4,6 +4,7 @@ import { AppointmentsProvider } from "@/contexts/AppointmentsContext";
 import { BidsProvider } from "@/contexts/BidsContext";
 import { ProjectsProvider } from "@/contexts/ProjectsContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
+import { SavedContractorsProvider } from "@/contexts/SavedContractorsContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useSegments, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -78,9 +79,11 @@ export default function RootLayout() {
             <AppointmentsProvider>
               <BidsProvider>
                 <ProjectsProvider>
-                  <GestureHandlerRootView style={{ flex: 1 }}>
-                    <RootLayoutNav />
-                  </GestureHandlerRootView>
+                  <SavedContractorsProvider>
+                    <GestureHandlerRootView style={{ flex: 1 }}>
+                      <RootLayoutNav />
+                    </GestureHandlerRootView>
+                  </SavedContractorsProvider>
                 </ProjectsProvider>
               </BidsProvider>
             </AppointmentsProvider>
