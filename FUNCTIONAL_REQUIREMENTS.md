@@ -16,7 +16,20 @@
 Bidroom is a construction job and contractor management mobile application that connects job posters (Project Managers) with contractors (General Contractors, Subcontractors, and Trade Specialists) for construction projects.
 
 ### Current State
-The app includes comprehensive construction management features with mock data and is under active development for iOS, Android, and Web platforms. Core features including role-based dashboards, AI-powered contract generation, and project management workflows are implemented.
+The app includes comprehensive construction management features with mock data and is under active development for iOS, Android, and Web platforms. Core features including role-based dashboards, AI-powered contract generation, project management workflows, enhanced contractor profiles, social proof features, advanced search, messaging enhancements, analytics tools, trust & safety features, and marketing tools are implemented.
+
+**Recently Implemented:**
+- Verification badges, reviews, and portfolio galleries
+- Social proof enhancements (endorsements, certifications, experience timeline, before/after)
+- Contractor discovery with advanced filtering and map view
+- Save/favorite contractors, share profiles, report content
+- Video consultation requests
+- Enhanced messaging (real-time chat, file sharing, quote history, templates)
+- Analytics dashboard for contractors
+- Dispute resolution workflow
+- Escrow payment system
+- Promotional badges and contractor comparison
+- Referral program functionality
 
 ### Platforms
 - **Mobile**: iOS and Android (React Native)
@@ -1659,18 +1672,18 @@ Streamlined workflow interface for general contractors and subcontractors.
 ## 7. Future Enhancements
 
 ### Planned Features
-- Push notifications
-- In-app messaging improvements
-- Advanced search filters
-- Saved searches
+- Push notifications (iOS/Android)
 - Email digest notifications
-- Calendar integration
+- Calendar integration (Google Calendar, iCal)
 - Video portfolio support
-- Advanced analytics
-- Multi-project management
-- Subcontractor management
+- Multi-project management enhancements
+- Subcontractor management tools
 - Equipment tracking
 - Material ordering integration
+- Live video estimates
+- Automated insurance verification
+- Background check automation
+- 3D project visualization
 
 ### Advanced Integrations
 - Background checks integration
