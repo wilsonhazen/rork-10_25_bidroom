@@ -26,6 +26,7 @@ import {
   Heart,
   Share2,
   Flag,
+  Video,
 } from "lucide-react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import Colors from "@/constants/colors";
@@ -33,6 +34,7 @@ import { mockContractors } from "@/mocks/data";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppointments } from "@/contexts/AppointmentsContext";
 import { useSavedContractors } from "@/contexts/SavedContractorsContext";
+import { useVideoConsultations } from "@/contexts/VideoConsultationsContext";
 import { Share, Platform } from "react-native";
 import TrustSuggestions from "@/components/TrustSuggestions";
 import VerificationBadge from "@/components/VerificationBadge";
@@ -79,8 +81,10 @@ export default function ContractorProfileScreen() {
   const { user } = useAuth();
   const { createAppointment } = useAppointments();
   const { isSaved, saveContractor, unsaveContractor } = useSavedContractors();
+  const { requestConsultation } = useVideoConsultations();
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showVideoConsultModal, setShowVideoConsultModal] = useState(false);
 
   const contractorId = Array.isArray(id) ? id[0] : id;
   const contractor = mockContractors.find((c) => c.id === contractorId);
@@ -375,6 +379,12 @@ export default function ContractorProfileScreen() {
           <Text style={styles.callButtonText}>Call</Text>
         </TouchableOpacity>
         <TouchableOpacity
+          style={styles.videoButton}
+          onPress={() => setShowVideoConsultModal(true)}
+        >
+          <Video size={20} color={Colors.white} />
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.requestButton}
           onPress={() => setShowRequestModal(true)}
         >
@@ -429,6 +439,38 @@ export default function ContractorProfileScreen() {
             [{ text: "OK" }]
           );
           setShowReportModal(false);
+        }}
+      />
+
+      <VideoConsultModal
+        visible={showVideoConsultModal}
+        contractor={contractor}
+        onClose={() => setShowVideoConsultModal(false)}
+        onSubmit={async (data) => {
+          if (!user) return;
+          
+          try {
+            await requestConsultation({
+              contractorId: contractor.id,
+              contractorName: contractor.name,
+              scheduledDate: data.scheduledDate,
+              scheduledTime: data.scheduledTime,
+              duration: data.duration,
+              topic: data.topic,
+              notes: data.notes,
+            });
+            
+            Alert.alert(
+              "Request Sent",
+              `Video consultation request sent to ${contractor.name}`,
+              [{ text: "OK" }]
+            );
+            
+            setShowVideoConsultModal(false);
+          } catch (error) {
+            console.error("Failed to request consultation:", error);
+            Alert.alert("Error", "Failed to send consultation request");
+          }
         }}
       />
     </View>
@@ -575,6 +617,181 @@ function RequestEstimateModal({
             disabled={submitting}
           >
             <Calendar size={20} color={Colors.white} />
+            <Text style={styles.submitButtonText}>
+              {submitting ? "Sending..." : "Send Request"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
+function VideoConsultModal({
+  visible,
+  contractor,
+  onClose,
+  onSubmit,
+}: {
+  visible: boolean;
+  contractor: any;
+  onClose: () => void;
+  onSubmit: (data: {
+    scheduledDate: string;
+    scheduledTime: string;
+    duration: number;
+    topic: string;
+    notes?: string;
+  }) => Promise<void>;
+}) {
+  const [formData, setFormData] = useState({
+    scheduledDate: new Date().toISOString().split("T")[0],
+    scheduledTime: "10:00",
+    duration: 30,
+    topic: "",
+    notes: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const durations = [
+    { value: 15, label: "15 minutes" },
+    { value: 30, label: "30 minutes" },
+    { value: 45, label: "45 minutes" },
+    { value: 60, label: "1 hour" },
+  ];
+
+  const handleSubmit = async () => {
+    if (!formData.topic.trim()) {
+      Alert.alert("Error", "Please enter a consultation topic");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await onSubmit(formData);
+      setFormData({
+        scheduledDate: new Date().toISOString().split("T")[0],
+        scheduledTime: "10:00",
+        duration: 30,
+        topic: "",
+        notes: "",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Request Video Consultation</Text>
+          <TouchableOpacity onPress={onClose}>
+            <X size={24} color={Colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          style={styles.modalContent}
+          contentContainerStyle={styles.modalContentInner}
+        >
+          <View style={styles.modalContractorInfo}>
+            <Text style={styles.modalInfoLabel}>Contractor:</Text>
+            <Text style={styles.modalInfoValue}>{contractor.name}</Text>
+            <Text style={styles.modalInfoCompany}>{contractor.company}</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Topic *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="What would you like to discuss?"
+              value={formData.topic}
+              onChangeText={(text) =>
+                setFormData({ ...formData, topic: text })
+              }
+              placeholderTextColor={Colors.textTertiary}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Duration *</Text>
+            <View style={styles.durationGrid}>
+              {durations.map((d) => (
+                <TouchableOpacity
+                  key={d.value}
+                  style={[
+                    styles.durationOption,
+                    formData.duration === d.value && styles.durationOptionActive,
+                  ]}
+                  onPress={() => setFormData({ ...formData, duration: d.value })}
+                >
+                  <Text
+                    style={[
+                      styles.durationText,
+                      formData.duration === d.value && styles.durationTextActive,
+                    ]}
+                  >
+                    {d.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.formRow}>
+            <View style={styles.formGroupHalf}>
+              <Text style={styles.label}>Preferred Date</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="YYYY-MM-DD"
+                value={formData.scheduledDate}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, scheduledDate: text })
+                }
+                placeholderTextColor={Colors.textTertiary}
+              />
+            </View>
+
+            <View style={styles.formGroupHalf}>
+              <Text style={styles.label}>Preferred Time</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="HH:MM"
+                value={formData.scheduledTime}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, scheduledTime: text })
+                }
+                placeholderTextColor={Colors.textTertiary}
+              />
+            </View>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Additional Notes</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Any specific topics or questions to cover..."
+              value={formData.notes}
+              onChangeText={(text) =>
+                setFormData({ ...formData, notes: text })
+              }
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              placeholderTextColor={Colors.textTertiary}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.submitButton,
+              submitting && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={submitting}
+          >
+            <Video size={20} color={Colors.white} />
             <Text style={styles.submitButtonText}>
               {submitting ? "Sending..." : "Send Request"}
             </Text>
@@ -947,6 +1164,15 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: Colors.white,
   },
+  videoButton: {
+    width: 50,
+    height: 50,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: Colors.info,
+    borderRadius: 12,
+  },
   requestButton: {
     flex: 2,
     flexDirection: "row" as const,
@@ -1254,6 +1480,34 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   reasonTextActive: {
+    fontWeight: "600" as const,
+    color: Colors.primary,
+  },
+  durationGrid: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 8,
+  },
+  durationOption: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: Colors.surface,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center" as const,
+  },
+  durationOptionActive: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + "10",
+  },
+  durationText: {
+    fontSize: 14,
+    color: Colors.text,
+  },
+  durationTextActive: {
     fontWeight: "600" as const,
     color: Colors.primary,
   },
