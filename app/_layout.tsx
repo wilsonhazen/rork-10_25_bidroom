@@ -8,6 +8,10 @@ import { SavedContractorsProvider } from "@/contexts/SavedContractorsContext";
 import { VideoConsultationsProvider } from "@/contexts/VideoConsultationsContext";
 import { MessageTemplatesProvider } from "@/contexts/MessageTemplatesContext";
 import { QuotesProvider } from "@/contexts/QuotesContext";
+import { AnalyticsContext } from "@/contexts/AnalyticsContext";
+import { DisputesContext } from "@/contexts/DisputesContext";
+import { EscrowContext } from "@/contexts/EscrowContext";
+import { ReferralsContext } from "@/contexts/ReferralsContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useSegments, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -65,6 +69,10 @@ function RootLayoutNav() {
       <Stack.Screen name="project-dashboard" options={{ headerShown: false }} />
       <Stack.Screen name="milestone-details" options={{ headerShown: false }} />
       <Stack.Screen name="project-closeout" options={{ headerShown: false }} />
+      <Stack.Screen name="contractor-comparison" options={{ headerShown: false }} />
+      <Stack.Screen name="disputes" options={{ headerShown: false }} />
+      <Stack.Screen name="referrals" options={{ headerShown: false }} />
+      <Stack.Screen name="insurance-verification" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -86,9 +94,17 @@ export default function RootLayout() {
                     <VideoConsultationsProvider>
                       <MessageTemplatesProvider>
                         <QuotesProvider>
-                          <GestureHandlerRootView style={{ flex: 1 }}>
-                            <RootLayoutNav />
-                          </GestureHandlerRootView>
+                          <AnalyticsContext>
+                            <DisputesContext>
+                              <EscrowContext>
+                                <ReferralsContext>
+                                  <GestureHandlerRootView style={{ flex: 1 }}>
+                                    <RootLayoutNav />
+                                  </GestureHandlerRootView>
+                                </ReferralsContext>
+                              </EscrowContext>
+                            </DisputesContext>
+                          </AnalyticsContext>
                         </QuotesProvider>
                       </MessageTemplatesProvider>
                     </VideoConsultationsProvider>
