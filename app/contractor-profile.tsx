@@ -33,6 +33,10 @@ import TrustSuggestions from "@/components/TrustSuggestions";
 import VerificationBadge from "@/components/VerificationBadge";
 import ReviewsList from "@/components/ReviewsList";
 import PortfolioGallery from "@/components/PortfolioGallery";
+import Endorsements from "@/components/Endorsements";
+import CertificationsAndAwards from "@/components/CertificationsAndAwards";
+import ExperienceTimeline from "@/components/ExperienceTimeline";
+import BeforeAfterComparison from "@/components/BeforeAfterComparison";
 import { 
   calculateTrustScore, 
   getTrustLevelColor, 
@@ -226,6 +230,33 @@ export default function ContractorProfileScreen() {
             </View>
           </View>
         </View>
+
+        {contractor.endorsements && contractor.endorsements.length > 0 && (
+          <View style={styles.section}>
+            <Endorsements endorsements={contractor.endorsements} />
+          </View>
+        )}
+
+        {(contractor.certifications || contractor.awards) && (
+          <View style={styles.section}>
+            <CertificationsAndAwards 
+              certifications={contractor.certifications}
+              awards={contractor.awards}
+            />
+          </View>
+        )}
+
+        {contractor.experienceTimeline && contractor.experienceTimeline.length > 0 && (
+          <View style={styles.section}>
+            <ExperienceTimeline timeline={contractor.experienceTimeline} />
+          </View>
+        )}
+
+        {contractor.beforeAfterProjects && contractor.beforeAfterProjects.length > 0 && (
+          <View style={styles.section}>
+            <BeforeAfterComparison projects={contractor.beforeAfterProjects} />
+          </View>
+        )}
 
         {contractor.portfolio && contractor.portfolio.length > 0 && (
           <View style={styles.section}>

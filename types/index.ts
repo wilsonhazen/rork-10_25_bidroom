@@ -51,6 +51,53 @@ export interface Review {
   };
 }
 
+export interface Endorsement {
+  id: string;
+  fromId: string;
+  fromName: string;
+  fromCompany: string;
+  skill: string;
+  relationship: "client" | "colleague" | "supervisor" | "subcontractor";
+  comment: string;
+  date: string;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuingOrganization: string;
+  issueDate: string;
+  expiryDate?: string;
+  credentialId?: string;
+  verificationUrl?: string;
+}
+
+export interface Award {
+  id: string;
+  title: string;
+  organization: string;
+  year: string;
+  description: string;
+}
+
+export interface ExperienceEntry {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  type: "milestone" | "project" | "certification" | "award";
+}
+
+export interface BeforeAfter {
+  id: string;
+  projectName: string;
+  beforeImage: string;
+  afterImage: string;
+  description: string;
+  completionDate: string;
+  category: string;
+}
+
 export interface Contractor {
   id: string;
   name: string;
@@ -72,6 +119,21 @@ export interface Contractor {
   specialties?: string[];
   portfolio?: PortfolioItem[];
   reviews?: Review[];
+  endorsements?: Endorsement[];
+  certifications?: Certification[];
+  awards?: Award[];
+  experienceTimeline?: ExperienceEntry[];
+  beforeAfterProjects?: BeforeAfter[];
+  featured?: boolean;
+  topRated?: boolean;
+  availability?: {
+    calendar: { date: string; available: boolean }[];
+    nextAvailable?: string;
+  };
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export type BidStatus = "pending" | "submitted" | "awarded" | "declined";
@@ -176,6 +238,51 @@ export interface JobMessage {
   message: string;
   sentAt: string;
   read: boolean;
+  attachments?: MessageAttachment[];
+  quoteId?: string;
+  templateId?: string;
+}
+
+export interface MessageAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
+export interface MessageTemplate {
+  id: string;
+  name: string;
+  content: string;
+  category: "greeting" | "quote" | "followup" | "availability" | "custom";
+  userId: string;
+}
+
+export interface Quote {
+  id: string;
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  jobId?: string;
+  title: string;
+  description: string;
+  lineItems: QuoteLineItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  validUntil: string;
+  status: "draft" | "sent" | "viewed" | "accepted" | "rejected" | "expired";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuoteLineItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
 export interface JobNotification {
@@ -447,4 +554,41 @@ export interface PunchListItem {
   photos: string[];
   completedAt?: string;
   createdAt: string;
+}
+
+export interface SavedContractor {
+  id: string;
+  userId: string;
+  contractorId: string;
+  savedAt: string;
+  notes?: string;
+}
+
+export interface ContractorReport {
+  id: string;
+  reportedBy: string;
+  reportedByName: string;
+  contractorId: string;
+  reason: "inappropriate" | "scam" | "fake_profile" | "harassment" | "other";
+  description: string;
+  evidence?: string[];
+  status: "pending" | "under_review" | "resolved" | "dismissed";
+  createdAt: string;
+}
+
+export interface VideoConsultation {
+  id: string;
+  requestedBy: string;
+  requestedByName: string;
+  contractorId: string;
+  contractorName: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  duration: number;
+  topic: string;
+  notes?: string;
+  status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show";
+  meetingUrl?: string;
+  createdAt: string;
+  updatedAt: string;
 }

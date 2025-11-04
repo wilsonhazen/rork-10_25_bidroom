@@ -1,4 +1,4 @@
-import { Appointment, Bid, BidSubmission, Contractor, PortfolioItem, Review } from "@/types";
+import { Appointment, Bid, BidSubmission, Contractor, PortfolioItem, Review, Endorsement, Certification, Award, ExperienceEntry, BeforeAfter } from "@/types";
 
 const samplePortfolio: PortfolioItem[] = [
   {
@@ -38,6 +38,140 @@ const samplePortfolio: PortfolioItem[] = [
       "https://images.unsplash.com/photo-1565008576549-57569a49371d?w=800",
     ],
     budget: "$120,000",
+    category: "Industrial",
+  },
+];
+
+const sampleEndorsements: Endorsement[] = [
+  {
+    id: "e1",
+    fromId: "u1",
+    fromName: "Sarah Johnson",
+    fromCompany: "Metro Builders",
+    skill: "Commercial Electrical Systems",
+    relationship: "client",
+    comment: "Carlos has exceptional expertise in commercial electrical systems. His attention to detail and code compliance is outstanding.",
+    date: "2024-01-10",
+  },
+  {
+    id: "e2",
+    fromId: "u2",
+    fromName: "Mike Davis",
+    fromCompany: "Urban Development",
+    skill: "Project Management",
+    relationship: "client",
+    comment: "Excellent project management skills. Always keeps projects on schedule and communicates effectively.",
+    date: "2023-12-20",
+  },
+  {
+    id: "e3",
+    fromId: "u3",
+    fromName: "Jennifer Lee",
+    fromCompany: "Lee Architecture Studio",
+    skill: "Smart Building Systems",
+    relationship: "colleague",
+    comment: "One of the best in smart building integration. Very knowledgeable about modern automation systems.",
+    date: "2023-11-15",
+  },
+];
+
+const sampleCertifications: Certification[] = [
+  {
+    id: "c1",
+    name: "Master Electrician License",
+    issuingOrganization: "California Contractors State License Board",
+    issueDate: "2012-06-15",
+    expiryDate: "2025-06-15",
+    credentialId: "CA-EL-12345",
+  },
+  {
+    id: "c2",
+    name: "LEED Accredited Professional",
+    issuingOrganization: "U.S. Green Building Council",
+    issueDate: "2018-03-20",
+    credentialId: "LEED-AP-8976",
+  },
+  {
+    id: "c3",
+    name: "OSHA 30-Hour Construction Safety",
+    issuingOrganization: "OSHA",
+    issueDate: "2023-01-10",
+    expiryDate: "2028-01-10",
+  },
+];
+
+const sampleAwards: Award[] = [
+  {
+    id: "a1",
+    title: "Excellence in Electrical Contracting",
+    organization: "National Electrical Contractors Association",
+    year: "2023",
+    description: "Awarded for outstanding work in commercial electrical projects.",
+  },
+  {
+    id: "a2",
+    title: "Safety First Award",
+    organization: "California Construction Association",
+    year: "2022",
+    description: "Recognition for maintaining zero workplace accidents for 3 consecutive years.",
+  },
+];
+
+const sampleExperienceTimeline: ExperienceEntry[] = [
+  {
+    id: "ex1",
+    year: "2012",
+    title: "Founded Rodriguez Electrical",
+    description: "Established company with focus on commercial and residential electrical services.",
+    type: "milestone",
+  },
+  {
+    id: "ex2",
+    year: "2015",
+    title: "Completed First Major Commercial Project",
+    description: "$500K office building electrical system installation.",
+    type: "project",
+  },
+  {
+    id: "ex3",
+    year: "2018",
+    title: "LEED Accreditation",
+    description: "Became LEED Accredited Professional for sustainable building practices.",
+    type: "certification",
+  },
+  {
+    id: "ex4",
+    year: "2022",
+    title: "Safety Excellence Award",
+    description: "Received Safety First Award from California Construction Association.",
+    type: "award",
+  },
+  {
+    id: "ex5",
+    year: "2024",
+    title: "100+ Projects Milestone",
+    description: "Successfully completed over 100 commercial and residential projects.",
+    type: "milestone",
+  },
+];
+
+const sampleBeforeAfter: BeforeAfter[] = [
+  {
+    id: "ba1",
+    projectName: "Office Renovation - Lighting Upgrade",
+    beforeImage: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+    afterImage: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800",
+    description: "Complete lighting system upgrade from fluorescent to LED with smart controls. Reduced energy consumption by 60%.",
+    completionDate: "2024-01-15",
+    category: "Commercial",
+  },
+  {
+    id: "ba2",
+    projectName: "Warehouse Electrical Panel Upgrade",
+    beforeImage: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800",
+    afterImage: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800",
+    description: "Upgraded outdated electrical panel to modern 400A service with sub-panels.",
+    completionDate: "2023-11-20",
     category: "Industrial",
   },
 ];
@@ -142,6 +276,22 @@ export const mockContractors: Contractor[] = [
     },
     portfolio: samplePortfolio,
     reviews: sampleReviews,
+    endorsements: sampleEndorsements,
+    certifications: sampleCertifications,
+    awards: sampleAwards,
+    experienceTimeline: sampleExperienceTimeline,
+    beforeAfterProjects: sampleBeforeAfter,
+    featured: true,
+    topRated: true,
+    coordinates: { lat: 34.0522, lng: -118.2437 },
+    availability: {
+      calendar: [
+        { date: "2025-11-06", available: true },
+        { date: "2025-11-07", available: false },
+        { date: "2025-11-08", available: true },
+      ],
+      nextAvailable: "2025-11-06",
+    },
   },
   {
     id: "2",
@@ -173,6 +323,8 @@ export const mockContractors: Contractor[] = [
       repeatClientRate: 72,
       disputeRate: 0.5,
     },
+    topRated: true,
+    coordinates: { lat: 34.0195, lng: -118.4912 },
   },
   {
     id: "3",
@@ -203,6 +355,8 @@ export const mockContractors: Contractor[] = [
       repeatClientRate: 58,
       disputeRate: 2,
     },
+    featured: true,
+    coordinates: { lat: 34.1478, lng: -118.1445 },
   },
   {
     id: "4",
