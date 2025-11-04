@@ -19,24 +19,24 @@ import {
   Award,
   Briefcase,
   Clock,
-  DollarSign,
   X,
   Shield,
   CheckCircle,
-  FileCheck,
   TrendingUp,
 } from "lucide-react-native";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import Colors from "@/constants/colors";
 import { mockContractors } from "@/mocks/data";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppointments } from "@/contexts/AppointmentsContext";
 import TrustSuggestions from "@/components/TrustSuggestions";
+import VerificationBadge from "@/components/VerificationBadge";
+import ReviewsList from "@/components/ReviewsList";
+import PortfolioGallery from "@/components/PortfolioGallery";
 import { 
   calculateTrustScore, 
   getTrustLevelColor, 
-  getTrustLevelLabel, 
-  getVerificationLabel 
+  getTrustLevelLabel
 } from "@/utils/trust";
 import { Contractor } from "@/types";
 
@@ -67,7 +67,6 @@ function TrustScoreCard({ contractor }: { contractor: Contractor }) {
 
 export default function ContractorProfileScreen() {
   const { id } = useLocalSearchParams();
-  const router = useRouter();
   const { user } = useAuth();
   const { createAppointment } = useAppointments();
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -91,56 +90,7 @@ export default function ContractorProfileScreen() {
     );
   }
 
-  const reviews = [
-    {
-      id: "1",
-      author: "John Smith",
-      company: "ABC Construction",
-      rating: 5,
-      date: "2024-01-15",
-      comment: "Excellent work! Very professional and completed the job on time.",
-    },
-    {
-      id: "2",
-      author: "Sarah Johnson",
-      company: "Metro Builders",
-      rating: 4,
-      date: "2024-01-10",
-      comment: "Great quality work. Communication could be better but overall satisfied.",
-    },
-    {
-      id: "3",
-      author: "Mike Davis",
-      company: "Urban Development",
-      rating: 5,
-      date: "2024-01-05",
-      comment: "Highly recommend! Best contractor we've worked with.",
-    },
-  ];
 
-  const recentProjects = [
-    {
-      id: "1",
-      name: "Commercial Office Renovation",
-      location: "Downtown LA",
-      completedDate: "2024-01-20",
-      budget: "$85,000",
-    },
-    {
-      id: "2",
-      name: "Residential Electrical Upgrade",
-      location: "Santa Monica",
-      completedDate: "2024-01-10",
-      budget: "$45,000",
-    },
-    {
-      id: "3",
-      name: "Industrial Facility Wiring",
-      location: "Long Beach",
-      completedDate: "2023-12-15",
-      budget: "$120,000",
-    },
-  ];
 
   return (
     <View style={styles.container}>
@@ -217,29 +167,11 @@ export default function ContractorProfileScreen() {
         {contractor.verifications && contractor.verifications.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Verifications</Text>
-            <View style={styles.verificationsGrid}>
-              {contractor.verifications.map((verification, index) => (
-                <View 
-                  key={index} 
-                  style={[
-                    styles.verificationItem,
-                    verification.verified && styles.verificationItemVerified
-                  ]}
-                >
-                  {verification.verified ? (
-                    <CheckCircle size={18} color={Colors.success} />
-                  ) : (
-                    <FileCheck size={18} color={Colors.textTertiary} />
-                  )}
-                  <Text style={[
-                    styles.verificationText,
-                    verification.verified && styles.verificationTextVerified
-                  ]}>
-                    {getVerificationLabel(verification.type)}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <VerificationBadge 
+              verifications={contractor.verifications} 
+              size="large"
+              showDetails
+            />
           </View>
         )}
 
@@ -295,49 +227,22 @@ export default function ContractorProfileScreen() {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Projects</Text>
-          {recentProjects.map((project) => (
-            <View key={project.id} style={styles.projectCard}>
-              <View style={styles.projectHeader}>
-                <Text style={styles.projectName}>{project.name}</Text>
-                <Text style={styles.projectBudget}>{project.budget}</Text>
-              </View>
-              <View style={styles.projectDetails}>
-                <MapPin size={14} color={Colors.textSecondary} />
-                <Text style={styles.projectLocation}>{project.location}</Text>
-              </View>
-              <View style={styles.projectDetails}>
-                <Calendar size={14} color={Colors.textSecondary} />
-                <Text style={styles.projectDate}>
-                  Completed {new Date(project.completedDate).toLocaleDateString()}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
+        {contractor.portfolio && contractor.portfolio.length > 0 && (
+          <View style={styles.section}>
+            <PortfolioGallery portfolio={contractor.portfolio} />
+          </View>
+        )}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Reviews</Text>
-          {reviews.map((review) => (
-            <View key={review.id} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <View style={styles.reviewAuthorInfo}>
-                  <Text style={styles.reviewAuthor}>{review.author}</Text>
-                  <Text style={styles.reviewCompany}>{review.company}</Text>
-                </View>
-                <View style={styles.reviewRating}>
-                  <Star size={14} color={Colors.warning} fill={Colors.warning} />
-                  <Text style={styles.reviewRatingText}>{review.rating}</Text>
-                </View>
-              </View>
-              <Text style={styles.reviewComment}>{review.comment}</Text>
-              <Text style={styles.reviewDate}>
-                {new Date(review.date).toLocaleDateString()}
-              </Text>
-            </View>
-          ))}
-        </View>
+        {contractor.reviews && contractor.reviews.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Reviews & Ratings</Text>
+            <ReviewsList 
+              reviews={contractor.reviews} 
+              averageRating={contractor.rating}
+              totalReviews={contractor.reviewCount}
+            />
+          </View>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>

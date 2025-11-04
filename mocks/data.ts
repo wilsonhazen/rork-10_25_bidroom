@@ -1,4 +1,112 @@
-import { Appointment, Bid, BidSubmission, Contractor } from "@/types";
+import { Appointment, Bid, BidSubmission, Contractor, PortfolioItem, Review } from "@/types";
+
+const samplePortfolio: PortfolioItem[] = [
+  {
+    id: "p1",
+    projectName: "Commercial Office Electrical Upgrade",
+    description: "Complete electrical system overhaul for a 10,000 sq ft commercial office space. Installed new panels, upgraded wiring, and added smart lighting controls throughout.",
+    location: "Downtown LA",
+    completedDate: "2024-01-15",
+    images: [
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800",
+      "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800",
+      "https://images.unsplash.com/photo-1621905252472-123320c6026e?w=800",
+    ],
+    budget: "$85,000",
+    category: "Commercial",
+  },
+  {
+    id: "p2",
+    projectName: "Residential Kitchen Remodel",
+    description: "Full kitchen electrical work including new outlets, under-cabinet lighting, and appliance circuits.",
+    location: "Santa Monica",
+    completedDate: "2023-12-10",
+    images: [
+      "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800",
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
+    ],
+    budget: "$35,000",
+    category: "Residential",
+  },
+  {
+    id: "p3",
+    projectName: "Industrial Warehouse Lighting",
+    description: "LED lighting retrofit for 50,000 sq ft warehouse with motion sensors and daylight harvesting controls.",
+    location: "Long Beach",
+    completedDate: "2023-11-20",
+    images: [
+      "https://images.unsplash.com/photo-1565008576549-57569a49371d?w=800",
+    ],
+    budget: "$120,000",
+    category: "Industrial",
+  },
+];
+
+const sampleReviews: Review[] = [
+  {
+    id: "r1",
+    authorId: "u1",
+    authorName: "John Smith",
+    authorCompany: "ABC Construction",
+    rating: 5,
+    date: "2024-01-20",
+    projectType: "Office Renovation",
+    comment: "Outstanding work from start to finish! Carlos and his team were professional, punctual, and delivered exceptional quality. They completed the electrical upgrade ahead of schedule and stayed within budget. The new lighting system has transformed our office space. Highly recommend for any commercial projects.",
+    helpful: 24,
+    response: {
+      message: "Thank you for the kind words, John! It was a pleasure working with your team on this project. We're thrilled that you're happy with the results.",
+      date: "2024-01-21",
+    },
+  },
+  {
+    id: "r2",
+    authorId: "u2",
+    authorName: "Sarah Johnson",
+    authorCompany: "Metro Builders",
+    rating: 4,
+    date: "2024-01-05",
+    projectType: "Residential Addition",
+    comment: "Great quality work and attention to detail. Communication could have been slightly better during the project, but the end result exceeded our expectations. Would definitely hire again.",
+    helpful: 15,
+  },
+  {
+    id: "r3",
+    authorId: "u3",
+    authorName: "Mike Davis",
+    authorCompany: "Urban Development",
+    rating: 5,
+    date: "2023-12-28",
+    projectType: "Warehouse Upgrade",
+    comment: "Best contractor we've worked with in 15 years! Exceptional expertise in industrial electrical systems. The team handled all the complex requirements with ease and kept our facility running throughout the upgrade.",
+    helpful: 31,
+    response: {
+      message: "We appreciate your continued trust in our team, Mike. Looking forward to the next project together!",
+      date: "2023-12-29",
+    },
+  },
+  {
+    id: "r4",
+    authorId: "u4",
+    authorName: "Lisa Martinez",
+    authorCompany: "Coastal Homes",
+    rating: 5,
+    date: "2023-12-15",
+    projectType: "Custom Home",
+    comment: "Carlos helped us through every step of the electrical planning for our custom home. His suggestions saved us money while improving the overall design. The workmanship is impeccable.",
+    helpful: 18,
+  },
+  {
+    id: "r5",
+    authorId: "u5",
+    authorName: "Robert Chen",
+    authorCompany: "Tech Startups Inc",
+    rating: 4,
+    date: "2023-11-30",
+    projectType: "Office Fit-out",
+    comment: "Solid work on our office build-out. The team was knowledgeable and handled the data cabling integration seamlessly. Minor delays due to permit issues, but overall very satisfied.",
+    helpful: 12,
+  },
+];
 
 export const mockContractors: Contractor[] = [
   {
@@ -32,6 +140,8 @@ export const mockContractors: Contractor[] = [
       repeatClientRate: 65,
       disputeRate: 1,
     },
+    portfolio: samplePortfolio,
+    reviews: sampleReviews,
   },
   {
     id: "2",

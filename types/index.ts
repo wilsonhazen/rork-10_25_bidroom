@@ -24,6 +24,33 @@ export interface TrustIndicators {
   disputeRate: number;
 }
 
+export interface PortfolioItem {
+  id: string;
+  projectName: string;
+  description: string;
+  location: string;
+  completedDate: string;
+  images: string[];
+  budget?: string;
+  category: string;
+}
+
+export interface Review {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorCompany: string;
+  rating: number;
+  date: string;
+  projectType: string;
+  comment: string;
+  helpful: number;
+  response?: {
+    message: string;
+    date: string;
+  };
+}
+
 export interface Contractor {
   id: string;
   name: string;
@@ -43,6 +70,8 @@ export interface Contractor {
   insuranceAmount?: string;
   licenseNumber?: string;
   specialties?: string[];
+  portfolio?: PortfolioItem[];
+  reviews?: Review[];
 }
 
 export type BidStatus = "pending" | "submitted" | "awarded" | "declined";
