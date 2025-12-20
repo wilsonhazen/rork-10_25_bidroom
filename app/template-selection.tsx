@@ -22,17 +22,44 @@ import {
 import { Stack, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 import { useTemplates } from "@/contexts/TemplatesContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { TemplatePhase } from "@/types";
 
 export default function TemplateSelectionScreen() {
   const router = useRouter();
+  const { hasPermission } = useAuth();
   const { templates, calculateSelectedPhaseCost, validatePhaseSelection } = useTemplates();
-  
-  const template = templates[0];
   
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
   const [planUrl, setPlanUrl] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
+  
+  const template = templates[0];
+  const canViewPricing = hasPermission("canCreateBids");
+
+  if (!canViewPricing) {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "Project Template",
+            headerShown: true,
+          }}
+        />
+        <View style={styles.centered}>
+          <AlertCircle size={48} color={Colors.error} />
+          <Text style={styles.errorTitle}>Access Denied</Text>
+          <Text style={styles.errorText}>Only project owners can access templates</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   const handleTogglePhase = (phaseId: string) => {
     if (selectedPhases.includes(phaseId)) {
@@ -132,7 +159,8 @@ export default function TemplateSelectionScreen() {
               <Text style={styles.statValue}>
                 ${(template.totalEstimatedCost.min / 1000).toFixed(0)}K+
               </Text>
-              <Text style={styles.statLabel}>Estimated</Text>
+              <Text style={styles.statLabel}>Est. Range</Text>
+              <Text style={styles.statNote}>(For your planning only)</Text>
             </View>
           </View>
         </View>
@@ -196,6 +224,10 @@ export default function TemplateSelectionScreen() {
                           ${(phase.estimatedCost.min / 1000).toFixed(0)}K - ${(phase.estimatedCost.max / 1000).toFixed(0)}K
                         </Text>
                       </View>
+                    </View>
+                    <View style={styles.pricingNote}>
+                      <Info size={12} color={Colors.warning} />
+                      <Text style={styles.pricingNoteText}>Market estimate - not shared with contractors</Text>
                     </View>
 
                     {hasDependencies && (
@@ -265,9 +297,15 @@ export default function TemplateSelectionScreen() {
               <Text style={styles.summaryValue}>{selectedPhases.length} of {template.phases.length}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Estimated Cost:</Text>
+              <Text style={styles.summaryLabel}>Market Estimate:</Text>
               <Text style={styles.summaryValue}>
                 ${selectedCost.min.toLocaleString()} - ${selectedCost.max.toLocaleString()}
+              </Text>
+            </View>
+            <View style={styles.warningBox}>
+              <AlertCircle size={16} color={Colors.warning} />
+              <Text style={styles.warningText}>
+                This pricing is for your budgeting only. Contractors cannot see these estimates and will provide independent bids.
               </Text>
             </View>
           </View>
@@ -348,6 +386,12 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: Colors.textTertiary,
+  },
+  statNote: {
+    fontSize: 10,
+    color: Colors.textTertiary,
+    fontStyle: "italic" as const,
+    textAlign: "center" as const,
   },
   infoCard: {
     flexDirection: "row" as const,
@@ -569,5 +613,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: Colors.white,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    padding: 32,
+    gap: 16,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: Colors.text,
+    marginTop: 16,
+  },
+  errorText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: "center" as const,
+  },
+  backButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  backButtonText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: Colors.white,
+  },
+  pricingNote: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    backgroundColor: Colors.warning + "10",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+  },
+  pricingNoteText: {
+    fontSize: 11,
+    color: Colors.warning,
+    fontWeight: "600" as const,
+    flex: 1,
+  },
+  warningBox: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 10,
+    backgroundColor: Colors.warning + "15",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  warningText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.text,
+    lineHeight: 18,
   },
 });
