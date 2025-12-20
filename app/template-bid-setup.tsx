@@ -539,6 +539,7 @@ const styles = StyleSheet.create({
   },
   inputColumn: {
     flex: 1,
+    minWidth: 0,
   },
   textArea: {
     backgroundColor: Colors.background,
