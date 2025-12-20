@@ -88,14 +88,14 @@ export default function DatePicker({
   }
 
   return (
-    <View style={style}>
+    <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity
         style={styles.dateButton}
         onPress={() => setShowPicker(true)}
       >
-        <Calendar size={20} color={Colors.primary} />
-        <Text style={[styles.dateButtonText, !value && styles.placeholder]}>
+        <Calendar size={20} color={Colors.primary} style={styles.icon} />
+        <Text style={[styles.dateButtonText, !value && styles.placeholder]} numberOfLines={1}>
           {value ? formatDisplayDate(value) : placeholder}
         </Text>
       </TouchableOpacity>
@@ -114,6 +114,9 @@ export default function DatePicker({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    width: "100%" as const,
+  },
   label: {
     fontSize: 14,
     fontWeight: "600" as const,
@@ -133,12 +136,16 @@ const styles = StyleSheet.create({
   dateButton: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 12,
     backgroundColor: Colors.background,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
     padding: 12,
+    width: "100%" as const,
+  },
+  icon: {
+    marginRight: 12,
+    flexShrink: 0,
   },
   dateButtonText: {
     fontSize: 15,
