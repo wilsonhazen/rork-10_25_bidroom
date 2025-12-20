@@ -43,7 +43,19 @@ export default function TemplateBidSetupScreen() {
   const { createBid } = useBids();
   
   const template = getTemplateById(templateId as string);
-  const selectedPhaseIds = JSON.parse(selectedPhasesParam as string);
+  
+  let selectedPhaseIds: string[] = [];
+  try {
+    if (typeof selectedPhasesParam === 'string') {
+      selectedPhaseIds = JSON.parse(selectedPhasesParam);
+    } else if (Array.isArray(selectedPhasesParam)) {
+      selectedPhaseIds = selectedPhasesParam;
+    }
+  } catch (error) {
+    console.error("Failed to parse selectedPhases:", error);
+    selectedPhaseIds = [];
+  }
+  
   const selectedPhases = template?.phases.filter(p => selectedPhaseIds.includes(p.id)) || [];
 
   const [projectName, setProjectName] = useState(template?.name || "");
