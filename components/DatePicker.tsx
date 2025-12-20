@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -31,6 +31,12 @@ export default function DatePicker({
   const [date, setDate] = useState<Date>(
     value ? new Date(value) : new Date()
   );
+
+  useEffect(() => {
+    if (value) {
+      setDate(new Date(value));
+    }
+  }, [value]);
 
   const handleChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === "android") {
