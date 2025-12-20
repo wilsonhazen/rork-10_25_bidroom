@@ -17,6 +17,8 @@ import {
   Clock,
   DollarSign,
   X,
+  FileText,
+  Sparkles,
 } from "lucide-react-native";
 import { Stack, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
@@ -241,6 +243,7 @@ function PostJobModal({
   onClose: () => void;
   onSubmit: (data: any) => Promise<void>;
 }) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -303,6 +306,30 @@ function PostJobModal({
           contentContainerStyle={styles.modalContentInner}
           showsVerticalScrollIndicator={false}
         >
+          <TouchableOpacity
+            style={styles.templateOption}
+            onPress={() => {
+              onClose();
+              router.push("/template-selection" as any);
+            }}
+          >
+            <View style={styles.templateIconContainer}>
+              <Sparkles size={24} color={Colors.primary} />
+            </View>
+            <View style={styles.templateContent}>
+              <Text style={styles.templateTitle}>Use Project Template</Text>
+              <Text style={styles.templateDescription}>
+                Start with our complete house build template - select phases, auto-generate bids, and manage the entire project
+              </Text>
+            </View>
+            <FileText size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR</Text>
+            <View style={styles.dividerLine} />
+          </View>
           <View style={styles.formGroup}>
             <Text style={styles.label}>Job Title *</Text>
             <TextInput
@@ -833,5 +860,54 @@ const styles = StyleSheet.create({
   pickerItemTextActive: {
     color: Colors.primary,
     fontWeight: "600" as const,
+  },
+  templateOption: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: Colors.primary + "10",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.primary + "40",
+    gap: 12,
+    marginBottom: 8,
+  },
+  templateIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.primary + "20",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  templateContent: {
+    flex: 1,
+    gap: 4,
+  },
+  templateTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  templateDescription: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+  },
+  divider: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.textTertiary,
   },
 });
