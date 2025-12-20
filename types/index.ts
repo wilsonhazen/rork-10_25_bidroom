@@ -625,6 +625,8 @@ export interface ProjectTemplate {
 }
 
 export interface TemplateBasedProject {
+  id: string;
+  ownerId: string;
   templateId: string;
   selectedPhases: string[];
   customizations?: {
@@ -636,5 +638,95 @@ export interface TemplateBasedProject {
     url: string;
     type: string;
   }[];
+  planUrl?: string;
   additionalNotes?: string;
+  createdAt: string;
+}
+
+export interface MarketPricing {
+  phaseId: string;
+  region: string;
+  averageCost: { min: number; max: number };
+  lastUpdated: string;
+  dataPoints: number;
+  trend: "increasing" | "stable" | "decreasing";
+}
+
+export interface ContractorBidTemplate {
+  id: string;
+  contractorId: string;
+  phaseName: string;
+  trade: string;
+  baseRate: number;
+  unit: "fixed" | "per_sqft" | "per_hour" | "per_day";
+  includedItems: string[];
+  excludedItems: string[];
+  warranty: string;
+  leadTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface BulkBidSubmission {
+  id: string;
+  contractorId: string;
+  projectId: string;
+  phases: {
+    phaseId: string;
+    amount: number;
+    notes?: string;
+    timeline: string;
+  }[];
+  bundleDiscount?: number;
+  totalAmount: number;
+  validUntil: string;
+  submittedAt: string;
+}
+
+export interface AutoMatchNotification {
+  id: string;
+  contractorId: string;
+  projectId: string;
+  phaseIds: string[];
+  matchScore: number;
+  matchReasons: string[];
+  sentAt: string;
+  viewed: boolean;
+  responded: boolean;
+}
+
+export interface PhaseMilestone {
+  id: string;
+  phaseId: string;
+  name: string;
+  percentage: number;
+  amount: number;
+  dueCondition: string;
+  completed: boolean;
+  completedAt?: string;
+  paidAt?: string;
+}
+
+export interface CostTracking {
+  projectId: string;
+  phaseId: string;
+  estimated: number;
+  actual: number;
+  variance: number;
+  variancePercentage: number;
+  status: "under" | "on_track" | "over";
+  milestones: PhaseMilestone[];
+}
+
+export interface ContractorQualification {
+  contractorId: string;
+  phaseId: string;
+  qualified: boolean;
+  reasons: string[];
+  requirements: {
+    name: string;
+    met: boolean;
+    value?: string;
+  }[];
+  score: number;
 }

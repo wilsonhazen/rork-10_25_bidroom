@@ -5,6 +5,10 @@ import { BidsProvider } from "@/contexts/BidsContext";
 import { ProjectsProvider } from "@/contexts/ProjectsContext";
 import { TemplatesProvider } from "@/contexts/TemplatesContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
+import { MarketPricingProvider } from "@/contexts/MarketPricingContext";
+import { ContractorBidTemplatesProvider } from "@/contexts/ContractorBidTemplatesContext";
+import { AutoMatchingProvider } from "@/contexts/AutoMatchingContext";
+import { CostTrackingProvider } from "@/contexts/CostTrackingContext";
 import { SavedContractorsProvider } from "@/contexts/SavedContractorsContext";
 import { VideoConsultationsProvider } from "@/contexts/VideoConsultationsContext";
 import { MessageTemplatesProvider } from "@/contexts/MessageTemplatesContext";
@@ -95,7 +99,11 @@ export default function RootLayout() {
               <BidsProvider>
                 <ProjectsProvider>
                   <TemplatesProvider>
-                    <SavedContractorsProvider>
+                    <MarketPricingProvider>
+                      <ContractorBidTemplatesProvider>
+                        <AutoMatchingProvider>
+                          <CostTrackingProvider>
+                            <SavedContractorsProvider>
                     <VideoConsultationsProvider>
                       <MessageTemplatesProvider>
                         <QuotesProvider>
@@ -113,7 +121,11 @@ export default function RootLayout() {
                         </QuotesProvider>
                       </MessageTemplatesProvider>
                     </VideoConsultationsProvider>
-                    </SavedContractorsProvider>
+                            </SavedContractorsProvider>
+                          </CostTrackingProvider>
+                        </AutoMatchingProvider>
+                      </ContractorBidTemplatesProvider>
+                    </MarketPricingProvider>
                   </TemplatesProvider>
                 </ProjectsProvider>
               </BidsProvider>
