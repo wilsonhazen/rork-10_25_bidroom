@@ -18,6 +18,8 @@ import {
   Loader,
   ChevronDown,
   ChevronUp,
+  Info,
+  TrendingUp,
 } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
@@ -230,6 +232,14 @@ export default function TemplateBidSetupScreen() {
               const groupPhases = group.phases
                 .map(phaseId => template.phases.find(p => p.id === phaseId))
                 .filter(Boolean);
+              
+              const groupCostEstimate = groupPhases.reduce(
+                (acc, phase) => ({
+                  min: acc.min + (phase?.estimatedCost.min || 0),
+                  max: acc.max + (phase?.estimatedCost.max || 0),
+                }),
+                { min: 0, max: 0 }
+              );
 
               return (
                 <View key={group.id} style={styles.groupCard}>
@@ -242,6 +252,12 @@ export default function TemplateBidSetupScreen() {
                       <Text style={styles.groupPhaseCount}>
                         {group.phases.length} phase{group.phases.length > 1 ? "s" : ""}
                       </Text>
+                      <View style={styles.estimateTag}>
+                        <TrendingUp size={14} color={Colors.success} />
+                        <Text style={styles.estimateText}>
+                          Est: ${groupCostEstimate.min.toLocaleString()} - ${groupCostEstimate.max.toLocaleString()}
+                        </Text>
+                      </View>
                     </View>
                     {isExpanded ? (
                       <ChevronUp size={20} color={Colors.textSecondary} />
@@ -286,6 +302,36 @@ export default function TemplateBidSetupScreen() {
           </View>
         )}
 
+        {bidGroups.length > 0 && (() => {
+          const totalEstimate = bidGroups.reduce((acc, group) => {
+            const groupPhases = group.phases
+              .map(phaseId => template.phases.find(p => p.id === phaseId))
+              .filter(Boolean);
+            return {
+              min: acc.min + groupPhases.reduce((sum, p) => sum + (p?.estimatedCost.min || 0), 0),
+              max: acc.max + groupPhases.reduce((sum, p) => sum + (p?.estimatedCost.max || 0), 0),
+            };
+          }, { min: 0, max: 0 });
+
+          return (
+            <View style={styles.totalEstimateCard}>
+              <View style={styles.totalEstimateHeader}>
+                <DollarSign size={24} color={Colors.success} />
+                <Text style={styles.totalEstimateTitle}>Total Project Estimate</Text>
+              </View>
+              <Text style={styles.totalEstimateAmount}>
+                ${totalEstimate.min.toLocaleString()} - ${totalEstimate.max.toLocaleString()}
+              </Text>
+              <View style={styles.estimateDisclaimer}>
+                <Info size={14} color={Colors.warning} />
+                <Text style={styles.estimateDisclaimerText}>
+                  Market estimate based on selected phases. Actual contractor bids may vary. This pricing is for your planning only.
+                </Text>
+              </View>
+            </View>
+          );
+        })()}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Create New Bid Group</Text>
 
@@ -300,6 +346,26 @@ export default function TemplateBidSetupScreen() {
             />
 
             <Text style={styles.inputLabel}>Select Phases</Text>
+            {newGroup.selectedPhases.length > 0 && (() => {
+              const newGroupPhases = newGroup.selectedPhases
+                .map(phaseId => selectedPhases.find(p => p.id === phaseId))
+                .filter(Boolean);
+              const newGroupEstimate = newGroupPhases.reduce(
+                (acc, phase) => ({
+                  min: acc.min + (phase?.estimatedCost.min || 0),
+                  max: acc.max + (phase?.estimatedCost.max || 0),
+                }),
+                { min: 0, max: 0 }
+              );
+              return (
+                <View style={styles.newGroupEstimate}>
+                  <TrendingUp size={16} color={Colors.success} />
+                  <Text style={styles.newGroupEstimateText}>
+                    Estimated: ${newGroupEstimate.min.toLocaleString()} - ${newGroupEstimate.max.toLocaleString()}
+                  </Text>
+                </View>
+              );
+            })()}
             <View style={styles.phaseSelectionList}>
               {selectedPhases.map((phase: TemplatePhase) => {
                 const isSelected = newGroup.selectedPhases.includes(phase.id);
@@ -483,6 +549,7 @@ const styles = StyleSheet.create({
   },
   groupHeaderContent: {
     flex: 1,
+    gap: 6,
   },
   groupName: {
     fontSize: 16,
@@ -642,5 +709,75 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: Colors.white,
+  },
+  estimateTag: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    backgroundColor: Colors.success + "15",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    alignSelf: "flex-start" as const,
+  },
+  estimateText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.success,
+  },
+  totalEstimateCard: {
+    backgroundColor: Colors.success + "10",
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.success + "40",
+    marginBottom: 24,
+    gap: 12,
+  },
+  totalEstimateHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+  },
+  totalEstimateTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  totalEstimateAmount: {
+    fontSize: 28,
+    fontWeight: "800" as const,
+    color: Colors.success,
+    letterSpacing: 0.5,
+  },
+  estimateDisclaimer: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 8,
+    backgroundColor: Colors.warning + "10",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  estimateDisclaimerText: {
+    flex: 1,
+    fontSize: 12,
+    color: Colors.text,
+    lineHeight: 17,
+  },
+  newGroupEstimate: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: Colors.success + "10",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  newGroupEstimateText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: Colors.success,
   },
 });
