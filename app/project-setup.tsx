@@ -22,7 +22,7 @@ import Colors from "@/constants/colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProjects } from "@/contexts/ProjectsContext";
 import { useBids } from "@/contexts/BidsContext";
-import { generateText } from "@rork/toolkit-sdk";
+import { generateText } from "@rork-ai/toolkit-sdk";
 
 export default function ProjectSetupScreen() {
   const { bidId, submissionId } = useLocalSearchParams();

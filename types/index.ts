@@ -592,3 +592,49 @@ export interface VideoConsultation {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface TemplatePhase {
+  id: string;
+  name: string;
+  description: string;
+  estimatedDuration: string;
+  order: number;
+  trades: string[];
+  tasks: string[];
+  deliverables: string[];
+  dependencies: string[];
+  estimatedCost: {
+    min: number;
+    max: number;
+  };
+  selected?: boolean;
+}
+
+export interface ProjectTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: "residential" | "commercial" | "industrial" | "renovation";
+  estimatedDuration: string;
+  phases: TemplatePhase[];
+  totalEstimatedCost: {
+    min: number;
+    max: number;
+  };
+  createdAt: string;
+}
+
+export interface TemplateBasedProject {
+  templateId: string;
+  selectedPhases: string[];
+  customizations?: {
+    phaseId: string;
+    modifications: string;
+  }[];
+  planDocuments?: {
+    name: string;
+    url: string;
+    type: string;
+  }[];
+  additionalNotes?: string;
+}

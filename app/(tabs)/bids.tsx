@@ -3,7 +3,7 @@ import { Bid, BidStatus } from "@/types";
 import { useBids } from "@/contexts/BidsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Stack, useRouter } from "expo-router";
-import { Calendar, FileText, Plus, Users, X } from "lucide-react-native";
+import { Calendar, FileText, Plus, Users, X, Building2 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -221,6 +221,7 @@ function CreateBidModal({
   visible: boolean;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const { createBid } = useBids();
   const [formData, setFormData] = useState({
     projectName: "",
@@ -271,6 +272,26 @@ function CreateBidModal({
           style={styles.modalContent}
           contentContainerStyle={styles.modalContentInner}
         >
+          <TouchableOpacity
+            style={styles.templateButton}
+            onPress={() => {
+              onClose();
+              router.push("/template-selection");
+            }}
+          >
+            <Building2 size={20} color={Colors.primary} />
+            <View style={styles.templateButtonContent}>
+              <Text style={styles.templateButtonTitle}>Use Project Template</Text>
+              <Text style={styles.templateButtonText}>Complete house build with 20+ phases</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OR CREATE CUSTOM BID</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
           <View style={styles.formGroup}>
             <Text style={styles.label}>Project Name *</Text>
             <TextInput
@@ -567,5 +588,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: Colors.white,
+  },
+  templateButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    backgroundColor: Colors.primary + "10",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.primary + "40",
+    marginBottom: 24,
+  },
+  templateButtonContent: {
+    flex: 1,
+  },
+  templateButtonTitle: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  templateButtonText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  divider: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    marginBottom: 24,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.textTertiary,
   },
 });

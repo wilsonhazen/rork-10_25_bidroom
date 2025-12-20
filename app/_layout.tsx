@@ -3,6 +3,7 @@ import { JobsProvider } from "@/contexts/JobsContext";
 import { AppointmentsProvider } from "@/contexts/AppointmentsContext";
 import { BidsProvider } from "@/contexts/BidsContext";
 import { ProjectsProvider } from "@/contexts/ProjectsContext";
+import { TemplatesProvider } from "@/contexts/TemplatesContext";
 import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import { SavedContractorsProvider } from "@/contexts/SavedContractorsContext";
 import { VideoConsultationsProvider } from "@/contexts/VideoConsultationsContext";
@@ -73,6 +74,9 @@ function RootLayoutNav() {
       <Stack.Screen name="disputes" options={{ headerShown: false }} />
       <Stack.Screen name="referrals" options={{ headerShown: false }} />
       <Stack.Screen name="insurance-verification" options={{ headerShown: false }} />
+      <Stack.Screen name="template-selection" options={{ headerShown: false }} />
+      <Stack.Screen name="template-bid-setup" options={{ headerShown: false }} />
+      <Stack.Screen name="dispute-details" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -90,7 +94,8 @@ export default function RootLayout() {
             <AppointmentsProvider>
               <BidsProvider>
                 <ProjectsProvider>
-                  <SavedContractorsProvider>
+                  <TemplatesProvider>
+                    <SavedContractorsProvider>
                     <VideoConsultationsProvider>
                       <MessageTemplatesProvider>
                         <QuotesProvider>
@@ -108,7 +113,8 @@ export default function RootLayout() {
                         </QuotesProvider>
                       </MessageTemplatesProvider>
                     </VideoConsultationsProvider>
-                  </SavedContractorsProvider>
+                    </SavedContractorsProvider>
+                  </TemplatesProvider>
                 </ProjectsProvider>
               </BidsProvider>
             </AppointmentsProvider>

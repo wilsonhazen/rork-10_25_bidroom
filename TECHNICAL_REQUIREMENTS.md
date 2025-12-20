@@ -254,7 +254,7 @@ The Rork platform provides built-in AI capabilities that are globally available 
 npm install @rork/toolkit-sdk
 
 // ✅ CORRECT - Just import and use directly
-import { generateText, generateObject } from '@rork/toolkit-sdk';
+import { generateText, generateObject } from '@rork-ai/toolkit-sdk';
 ```
 
 The package is globally available and will NOT appear in:
@@ -267,7 +267,7 @@ This is by design and uses TypeScript path mapping configured in the Rork enviro
 ### 3.2 AI Text Generation
 
 ```typescript
-import { generateText } from '@rork/toolkit-sdk';
+import { generateText } from '@rork-ai/toolkit-sdk';
 
 // Simple text generation
 const summary = await generateText("Summarize this project scope...");
@@ -285,7 +285,7 @@ const response = await generateText({
 ### 3.3 AI Structured Object Generation
 
 ```typescript
-import { generateObject } from '@rork/toolkit-sdk';
+import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 
 const ContractSchema = z.object({
@@ -316,7 +316,7 @@ const contract = await generateObject({
 ### 3.4 AI Chat Agent with Tools
 
 ```typescript
-import { createRorkTool, useRorkAgent } from '@rork/toolkit-sdk';
+import { createRorkTool, useRorkAgent } from '@rork-ai/toolkit-sdk';
 
 const { messages, sendMessage, addToolResult } = useRorkAgent({
   tools: {
@@ -1205,7 +1205,7 @@ Mobile Apps (iOS/Android) → API Gateway → Backend
 
 ```typescript
 // services/ai/contract-generation.ts
-import { generateObject } from '@rork/toolkit-sdk';
+import { generateObject } from '@rork-ai/toolkit-sdk';
 import { z } from 'zod';
 
 const ContractSchema = z.object({
@@ -1304,7 +1304,7 @@ export async function generateContract(
 
 ```typescript
 // services/ai/progress-monitoring.ts
-import { generateObject } from '@rork/toolkit-sdk';
+import { generateObject } from '@rork-ai/toolkit-sdk';
 
 const ProgressAnalysisSchema = z.object({
   workQuality: z.enum(['excellent', 'good', 'acceptable', 'poor']),
