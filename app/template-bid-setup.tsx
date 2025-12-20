@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
 } from "react-native";
+import DatePicker from "@/components/DatePicker";
 import {
   CheckSquare,
   Send,
@@ -201,13 +202,12 @@ export default function TemplateBidSetupScreen() {
               onChangeText={setProjectName}
             />
 
-            <Text style={styles.inputLabel}>Overall Project Due Date</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="2026-12-31"
-              placeholderTextColor={Colors.textTertiary}
+            <DatePicker
+              label="Overall Project Due Date"
               value={projectDueDate}
-              onChangeText={setProjectDueDate}
+              onChange={setProjectDueDate}
+              placeholder="Select project due date"
+              minimumDate={new Date()}
             />
           </View>
         </View>
@@ -292,13 +292,13 @@ export default function TemplateBidSetupScreen() {
                       </View>
 
                       <View style={styles.inputColumn}>
-                        <Text style={styles.inputLabel}>Due Date</Text>
-                        <TextInput
-                          style={[styles.input, !phaseBid.dueDate && styles.inputIncomplete]}
-                          placeholder="2026-03-15"
-                          placeholderTextColor={Colors.textTertiary}
+                        <DatePicker
+                          label="Due Date"
                           value={phaseBid.dueDate}
-                          onChangeText={(text) => updatePhaseBid(phaseBid.phaseId, "dueDate", text)}
+                          onChange={(date) => updatePhaseBid(phaseBid.phaseId, "dueDate", date)}
+                          placeholder="Select due date"
+                          minimumDate={new Date()}
+                          style={!phaseBid.dueDate && styles.inputIncomplete}
                         />
                       </View>
                     </View>

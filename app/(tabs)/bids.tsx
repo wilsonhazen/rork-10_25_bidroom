@@ -1,5 +1,6 @@
 import Colors from "@/constants/colors";
 import { Bid, BidStatus } from "@/types";
+import DatePicker from "@/components/DatePicker";
 import { useBids } from "@/contexts/BidsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Stack, useRouter } from "expo-router";
@@ -332,18 +333,13 @@ function CreateBidModal({
             />
           </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Due Date *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="YYYY-MM-DD"
-              value={formData.dueDate}
-              onChangeText={(text) =>
-                setFormData({ ...formData, dueDate: text })
-              }
-              placeholderTextColor={Colors.textTertiary}
-            />
-          </View>
+          <DatePicker
+            label="Due Date *"
+            value={formData.dueDate}
+            onChange={(date) => setFormData({ ...formData, dueDate: date })}
+            placeholder="Select due date"
+            minimumDate={new Date()}
+          />
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Budget (Optional)</Text>
