@@ -718,7 +718,134 @@ Comprehensive contractor profile view accessible to project managers and owners.
 
 ---
 
-## 6. Construction Management System
+## 6. Template System & Automation
+
+### 6.1 Project Templates
+
+**Template-Based Project Creation:**
+Owners can select from pre-built project templates (e.g., Complete House Build with 20 phases) to streamline large-scale project setup and bidding.
+
+**Template Features:**
+- Pre-defined construction phases with cost estimates
+- Phase dependencies and sequential ordering
+- Trade requirements per phase
+- Timeline estimates per phase
+- Estimated cost ranges (min/max) based on market data
+
+**Template Usage Workflow:**
+1. Owner selects "Use Template" when posting a new project
+2. Reviews all 20 phases with descriptions, trades, and cost estimates
+3. Selects desired phases (system validates dependencies)
+4. Views estimated total cost with bundle discounts
+5. Adds plan documents/URLs and additional notes
+6. Creates bid groups from selected phases
+7. **Each selected phase or group becomes a SEPARATE job posting**
+8. Contractors bid on individual phases/groups independently
+
+**Critical Feature - Separate Sub-Bids:**
+- Each selected phase creates an independent job posting
+- Contractors see individual phase requirements without template pricing
+- Contractors submit their own pricing estimates
+- Owner reviews bids per phase separately
+- Multiple contractors can be awarded different phases
+- All phases tracked under parent project umbrella
+
+**Example:**
+If owner selects 5 phases:
+- Foundation & Concrete Work
+- Rough Framing
+- Rough Plumbing
+- Rough Electrical
+- HVAC Installation
+
+The system creates 5 separate job postings. A plumbing contractor can bid only on "Rough Plumbing" without seeing or bidding on the other phases.
+
+### 6.2 Bid Grouping System
+
+**Flexible Bid Groups:**
+Owners can group related phases into single bid opportunities:
+- Group "Foundation + Framing" for general contractors
+- Keep "Plumbing," "Electrical," "HVAC" as separate bids
+- Each group = one job posting with multiple phases
+- Contractors bid on entire group
+
+**Benefits:**
+- Allows specialized contractors to bid on their trades only
+- Enables general contractors to bid on multiple phases
+- Reduces coordination complexity
+- Maintains competitive bidding per trade
+
+### 6.3 Market Pricing Intelligence
+
+**Purpose:**
+Provides owners with realistic budget expectations and helps platform identify outlier bids.
+
+**Features:**
+- Regional market rates per phase
+- Cost trends (increasing, stable, decreasing)
+- Bundle discounts (3+ phases: 5%, 5+ phases: 10%, 10+ phases: 15%)
+- Estimated total calculator
+
+**Important**: Contractors DO NOT see template pricing when bidding. They provide independent estimates based on their own costs and margins.
+
+### 6.4 Auto-Matching System
+
+**Intelligent Contractor Notifications:**
+When owners post template-based jobs, qualified contractors automatically receive notifications.
+
+**Match Score (0-100):**
+- Trade alignment: 40 points
+- Contractor rating: up to 20 points
+- Completed projects: up to 20 points
+- Other factors: up to 20 points
+
+**Qualification Requirements:**
+- Trade specialization match
+- Active insurance verification
+- Valid license verification
+- Minimum 3.5-star rating
+- 5+ completed projects
+
+### 6.5 Contractor Bid Templates
+
+**Saved Bid Templates:**
+Contractors can save standard pricing for common work types to speed up bidding.
+
+**Features:**
+- Reusable pricing templates per trade
+- Multiple pricing models (fixed, per sqft, per hour, per day)
+- Included/excluded items checklists
+- Warranty terms and lead times
+- Quick estimate calculator
+
+**Benefits:**
+- 70% reduction in bid preparation time
+- Consistent pricing across similar jobs
+- Professional presentation
+- Reduced errors
+
+### 6.6 Cost Tracking & Variance Analysis
+
+**Real-Time Budget Monitoring:**
+- Track estimated vs actual costs per phase
+- Variance calculations with status indicators
+- Milestone-based payment tracking
+- Project-level totals and summaries
+
+**Payment Milestones (Auto-Generated):**
+- 20% Initial Deposit (contract signing)
+- 30% Mid-Phase (50% completion)
+- 30% Near Completion (90% completion)
+- 20% Final Payment (completion & inspection)
+
+**Variance Alerts:**
+- Under budget: < -5%
+- On track: ±5%
+- Over budget: > 10%
+
+---
+
+## 7. Construction Management System
 
 ### 6.1 Construction Management Workflow
 When a bid is accepted, Bidroom transforms into a comprehensive construction management platform that automates the entire project lifecycle from contract generation to final closeout.
@@ -1669,7 +1796,7 @@ Streamlined workflow interface for general contractors and subcontractors.
 
 ---
 
-## 7. Future Enhancements
+## 8. Future Enhancements
 
 ### Planned Features
 - Push notifications (iOS/Android)

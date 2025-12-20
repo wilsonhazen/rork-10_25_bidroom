@@ -2,7 +2,20 @@
 
 ## Overview
 
-The Template System is a comprehensive framework for managing large-scale construction projects (specifically house builds) through a structured, phase-based bidding and management system. It allows project owners to select specific phases of a construction project template, create bid groups, receive automated contractor matches, and track costs through completion.
+The Template System is a comprehensive framework for managing large-scale construction projects (specifically house builds) through a structured, phase-based bidding and management system. 
+
+**Critical Feature**: When owners select phases from a template and create bid groups, **each group becomes an independent job posting** that contractors can bid on separately. This allows specialized contractors to bid only on their trade-specific work while enabling general contractors to bid on multiple phases.
+
+Key capabilities:
+- Select specific phases from pre-built templates (20 phases for house build)
+- Create flexible bid groups (single phase or multiple related phases)
+- **Each bid group = separate job posting**
+- Contractors see and bid on individual groups only
+- Multiple contractors work on different phases
+- All phases managed under parent project
+- Market pricing for owners (contractors don't see this)
+- Auto-matching qualified contractors to opportunities
+- Real-time cost tracking and variance analysis
 
 ## Table of Contents
 
@@ -476,7 +489,7 @@ Handles different pricing units (fixed, per sqft, etc.).
 3. Lands on /template-selection
    - Views HOUSE_BUILD_TEMPLATE details
    - Sees 20 phases with cost estimates
-   - Market pricing displayed per phase
+   - Market pricing displayed per phase (for owner reference only)
    ↓
 4. Selects desired phases (checkboxes)
    - System validates dependencies in real-time
@@ -490,44 +503,62 @@ Handles different pricing units (fixed, per sqft, etc.).
    ↓
 7. Lands on /template-bid-setup
    - Creates bid groups (one or more phases per group)
+   - **CRITICAL**: Each group becomes a SEPARATE job posting
+   - Example: "Foundation + Framing" = 1 job, "Plumbing" = 1 job
    - Sets budget and due date per group
-   - Can group related phases (e.g., "Foundation + Framing")
+   - Can group related phases or keep separate
    ↓
 8. Taps "Post X Bids"
-   - Creates separate bid for each group
-   - Triggers auto-matching algorithm
+   - Creates separate job posting for each group
+   - Triggers auto-matching algorithm per job
    - Sends notifications to qualified contractors
+   - Contractors see ONLY jobs matching their trade
    ↓
 9. Redirects to /(tabs)/bids
-   - View posted bids
-   - Track contractor responses
+   - View posted job listings (one per bid group)
+   - Track contractor responses per job
+   - Review bids per job separately
 ```
 
 ### Flow 2: Contractor Receives Auto-Match Notification
 
 ```
-1. Owner posts bid with phases
+1. Owner posts job with phases from template
    ↓
 2. System runs auto-matching algorithm
    - Calculates match scores for all contractors
    - Filters by qualification requirements
+   - Matches contractors to THEIR trade-specific jobs only
    ↓
 3. Qualified contractors receive notification
-   - Notification includes match score and reasons
+   - Notification for jobs matching their trade
+   - Includes match score and reasons
    - Shows phase details and requirements
+   - NO template pricing visible to contractors
    ↓
 4. Contractor views notification
-   - Reviews project details
-   - Sees market pricing comparison
+   - Reviews job posting details
+   - Sees scope, deliverables, timeline
+   - Cannot see owner's budget estimate
    ↓
-5. Contractor uses saved template to bid
+5. Contractor uses saved template to bid (optional)
    - getTemplateForPhase("Foundation & Concrete Work")
    - Pre-fills bid form with saved rates
-   - Adjusts as needed for specific project
+   - Adjusts pricing for specific project
    ↓
-6. Submits bid
+6. Submits bid with their own pricing
    - Owner receives bid with contractor details
+   - Owner compares to market rates (backend)
+   - Owner makes award decision
 ```
+
+**Example Scenario:**
+- Owner posts "Plumbing" job from template
+- Auto-matching identifies 10 plumbers
+- Only those 10 plumbers get notified
+- Electricians, framers, etc. don't see this job
+- Each plumber bids independently
+- Owner reviews all plumbing bids separately
 
 ### Flow 3: Budget Tracking Through Completion
 

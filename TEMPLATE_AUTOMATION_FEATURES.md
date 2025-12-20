@@ -3,10 +3,45 @@
 ## Overview
 This document outlines the automation features implemented for the house build template system to streamline pricing, bidding, and project management for new construction projects.
 
+## Critical Feature: Separate Sub-Bids
+
+**Key Concept**: When an owner selects phases from a template and creates bid groups, **each group becomes an independent job posting** that contractors can bid on separately.
+
+**Example Workflow:**
+1. Owner selects 5 phases from house build template:
+   - Foundation & Concrete Work
+   - Rough Framing  
+   - Rough Plumbing
+   - Rough Electrical
+   - HVAC Installation
+
+2. Owner creates bid groups:
+   - Group 1: "Foundation + Framing" (for general contractors)
+   - Group 2: "Plumbing" (for plumbers only)
+   - Group 3: "Electrical" (for electricians only)
+   - Group 4: "HVAC" (for HVAC specialists only)
+
+3. System creates 4 **separate job postings**
+
+4. Contractors see and bid on individual groups:
+   - A plumber sees only the "Plumbing" job posting
+   - An electrician sees only the "Electrical" job posting
+   - A general contractor can bid on "Foundation + Framing"
+
+5. Owner reviews bids per group and awards contracts separately
+
+6. Multiple contractors work on different phases under parent project
+
+**Critical**: Contractors DO NOT see template pricing estimates. They provide their own independent bids based on their costs and margins.
+
 ## Features Implemented
 
 ### 1. Market-Rate Pricing Database
 **Context:** `contexts/MarketPricingContext.tsx`
+
+**Purpose**: Provides owners with realistic budget expectations and helps platform identify outlier bids.
+
+**Important**: This pricing data is for **owner and platform use only**. Contractors DO NOT see these estimates when bidding.
 
 Provides regional pricing intelligence for all phases:
 - **Average cost ranges** (min/max) per phase based on market data
