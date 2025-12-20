@@ -148,6 +148,12 @@ export interface Bid {
   contractorCount: number;
   submittedCount: number;
   createdAt: string;
+  parentProjectId?: string;
+  parentProjectName?: string;
+  phaseId?: string;
+  phaseName?: string;
+  phaseOrder?: number;
+  templateId?: string;
 }
 
 export interface BidSubmission {

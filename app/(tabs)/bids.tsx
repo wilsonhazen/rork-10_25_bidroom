@@ -46,6 +46,17 @@ function BidCard({ bid, onPress, submissionsCount }: BidCardProps) {
 
   return (
     <TouchableOpacity style={styles.bidCard} onPress={onPress}>
+      {bid.parentProjectName && (
+        <View style={styles.parentProjectTag}>
+          <Building2 size={12} color={Colors.primary} />
+          <Text style={styles.parentProjectText}>{bid.parentProjectName}</Text>
+          {bid.phaseOrder && (
+            <View style={styles.phaseOrderBadge}>
+              <Text style={styles.phaseOrderText}>Phase {bid.phaseOrder}</Text>
+            </View>
+          )}
+        </View>
+      )}
       <View style={styles.bidHeader}>
         <View style={styles.bidTitleSection}>
           <Text style={styles.bidTitle} numberOfLines={1}>
@@ -506,6 +517,32 @@ const styles = StyleSheet.create({
   submissionsTitle: {
     fontSize: 13,
     fontWeight: "600" as const,
+    color: Colors.primary,
+  },
+  parentProjectTag: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    marginBottom: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border + "40",
+  },
+  parentProjectText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: Colors.primary,
+    flex: 1,
+  },
+  phaseOrderBadge: {
+    backgroundColor: Colors.primary + "20",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  phaseOrderText: {
+    fontSize: 10,
+    fontWeight: "700" as const,
     color: Colors.primary,
   },
   emptyState: {

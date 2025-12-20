@@ -10,28 +10,25 @@ import {
 } from "react-native";
 import {
   CheckSquare,
-  Square,
   Send,
-  Calendar,
   DollarSign,
-  Users,
   Loader,
   ChevronDown,
   ChevronUp,
   Info,
   TrendingUp,
+  Layers,
 } from "lucide-react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import Colors from "@/constants/colors";
 import { useTemplates } from "@/contexts/TemplatesContext";
 import { useBids } from "@/contexts/BidsContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { TemplatePhase } from "@/types";
 
-type BidGroup = {
-  id: string;
-  name: string;
-  phases: string[];
+type PhaseBid = {
+  phaseId: string;
+  phaseName: string;
+  phaseOrder: number;
   budget: string;
   dueDate: string;
   description: string;
@@ -48,87 +45,44 @@ export default function TemplateBidSetupScreen() {
   const selectedPhaseIds = JSON.parse(selectedPhasesParam as string);
   const selectedPhases = template?.phases.filter(p => selectedPhaseIds.includes(p.id)) || [];
 
-  const [bidGroups, setBidGroups] = useState<BidGroup[]>([]);
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
-  const [posting, setPosting] = useState(false);
-
-  const [newGroup, setNewGroup] = useState({
-    name: "",
-    selectedPhases: [] as string[],
-    budget: "",
-    dueDate: "",
-    description: "",
-  });
-
-  const handleTogglePhaseInGroup = (phaseId: string) => {
-    if (newGroup.selectedPhases.includes(phaseId)) {
-      setNewGroup({
-        ...newGroup,
-        selectedPhases: newGroup.selectedPhases.filter(id => id !== phaseId),
-      });
-    } else {
-      setNewGroup({
-        ...newGroup,
-        selectedPhases: [...newGroup.selectedPhases, phaseId],
-      });
-    }
-  };
-
-  const handleAddGroup = () => {
-    if (!newGroup.name.trim()) {
-      Alert.alert("Missing Information", "Please enter a name for this bid group.");
-      return;
-    }
-    if (newGroup.selectedPhases.length === 0) {
-      Alert.alert("No Phases Selected", "Please select at least one phase for this bid group.");
-      return;
-    }
-    if (!newGroup.budget.trim()) {
-      Alert.alert("Missing Budget", "Please enter a budget for this bid group.");
-      return;
-    }
-    if (!newGroup.dueDate.trim()) {
-      Alert.alert("Missing Due Date", "Please enter a due date for this bid group.");
-      return;
-    }
-
-    const group: BidGroup = {
-      id: `group-${Date.now()}`,
-      name: newGroup.name,
-      phases: newGroup.selectedPhases,
-      budget: newGroup.budget,
-      dueDate: newGroup.dueDate,
-      description: newGroup.description,
-    };
-
-    setBidGroups([...bidGroups, group]);
-    setNewGroup({
-      name: "",
-      selectedPhases: [],
+  const [projectName, setProjectName] = useState(template?.name || "");
+  const [projectDueDate, setProjectDueDate] = useState("");
+  const [phaseBids, setPhaseBids] = useState<PhaseBid[]>(
+    selectedPhases.map(phase => ({
+      phaseId: phase.id,
+      phaseName: phase.name,
+      phaseOrder: phase.order,
       budget: "",
       dueDate: "",
-      description: "",
-    });
-  };
+      description: phase.description,
+    }))
+  );
+  const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
 
-  const handleRemoveGroup = (groupId: string) => {
-    Alert.alert(
-      "Remove Bid Group",
-      "Are you sure you want to remove this bid group?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => setBidGroups(bidGroups.filter(g => g.id !== groupId)),
-        },
-      ]
-    );
+  const updatePhaseBid = (phaseId: string, field: keyof PhaseBid, value: string) => {
+    setPhaseBids(prev => prev.map(pb => 
+      pb.phaseId === phaseId ? { ...pb, [field]: value } : pb
+    ));
   };
 
   const handlePostAllBids = async () => {
-    if (bidGroups.length === 0) {
-      Alert.alert("No Bid Groups", "Please create at least one bid group to post.");
+    if (!projectName.trim()) {
+      Alert.alert("Missing Information", "Please enter a project name.");
+      return;
+    }
+
+    if (!projectDueDate.trim()) {
+      Alert.alert("Missing Due Date", "Please enter a project due date.");
+      return;
+    }
+
+    const incompleteBids = phaseBids.filter(pb => !pb.budget.trim() || !pb.dueDate.trim());
+    if (incompleteBids.length > 0) {
+      Alert.alert(
+        "Incomplete Information",
+        `Please fill in budget and due date for all phases. ${incompleteBids.length} phase${incompleteBids.length > 1 ? 's' : ''} incomplete.`
+      );
       return;
     }
 
@@ -140,25 +94,31 @@ export default function TemplateBidSetupScreen() {
     setPosting(true);
 
     try {
-      for (const group of bidGroups) {
-        const phaseNames = group.phases
-          .map(phaseId => template?.phases.find(p => p.id === phaseId)?.name)
-          .filter(Boolean)
-          .join(", ");
+      const parentProjectId = `project-${Date.now()}`;
+      
+      for (const phaseBid of phaseBids) {
+        const phase = template?.phases.find(p => p.id === phaseBid.phaseId);
+        if (!phase) continue;
 
         await createBid({
-          projectName: `${template?.name} - ${group.name}`,
-          description: `${group.description}\n\nPhases: ${phaseNames}\n\nTemplate: ${template?.name}\n\nAdditional Notes: ${additionalNotes || "None"}\n\nPlans: ${planUrl || "Not provided"}`,
-          dueDate: group.dueDate,
+          projectName: `${phaseBid.phaseName}`,
+          description: `${phaseBid.description}\n\n**Phase Details:**\n- Estimated Duration: ${phase.estimatedDuration}\n- Required Trades: ${phase.trades.join(", ")}\n\n**Deliverables:**\n${phase.deliverables.map(d => `- ${d}`).join("\n")}\n\n**Tasks:**\n${phase.tasks.map(t => `- ${t}`).join("\n")}\n\n**Project Information:**\nAdditional Notes: ${additionalNotes || "None"}\nPlans: ${planUrl || "Not provided"}`,
+          dueDate: phaseBid.dueDate,
           status: "pending",
-          budget: group.budget,
+          budget: phaseBid.budget,
           contractorCount: 0,
+          parentProjectId,
+          parentProjectName: projectName,
+          phaseId: phaseBid.phaseId,
+          phaseName: phaseBid.phaseName,
+          phaseOrder: phaseBid.phaseOrder,
+          templateId: template?.id,
         });
       }
 
       Alert.alert(
         "Success",
-        `${bidGroups.length} bid${bidGroups.length > 1 ? "s" : ""} posted successfully!`,
+        `Project "${projectName}" created with ${phaseBids.length} separate phase bid${phaseBids.length > 1 ? "s" : ""}!\n\nContractors can now bid on individual phases.`,
         [
           {
             text: "View Bids",
@@ -174,17 +134,24 @@ export default function TemplateBidSetupScreen() {
     }
   };
 
-  const handleCreateSingleBid = () => {
-    setBidGroups([
-      {
-        id: `group-single-${Date.now()}`,
-        name: "Complete Project",
-        phases: selectedPhaseIds,
-        budget: "",
-        dueDate: "",
-        description: `Full ${template?.name} project including all selected phases`,
-      },
-    ]);
+  const applyBudgetToAll = () => {
+    if (phaseBids.length === 0) return;
+    const firstBudget = phaseBids[0].budget;
+    if (!firstBudget) {
+      Alert.alert("No Budget", "Please enter a budget for the first phase to copy to all.");
+      return;
+    }
+    setPhaseBids(prev => prev.map(pb => ({ ...pb, budget: firstBudget })));
+  };
+
+  const applyDueDateToAll = () => {
+    if (phaseBids.length === 0) return;
+    const firstDueDate = phaseBids[0].dueDate;
+    if (!firstDueDate) {
+      Alert.alert("No Due Date", "Please enter a due date for the first phase to copy to all.");
+      return;
+    }
+    setPhaseBids(prev => prev.map(pb => ({ ...pb, dueDate: firstDueDate })));
   };
 
   if (!template) {
@@ -212,104 +179,142 @@ export default function TemplateBidSetupScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Create Bid Groups</Text>
+          <Text style={styles.title}>Setup Project Bids</Text>
           <Text style={styles.subtitle}>
-            Group phases together to post separate bids, or create a single bid for the entire project
+            Each phase will be posted as a separate bid. Contractors can bid on individual phases or multiple phases.
           </Text>
         </View>
 
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.quickActionButton} onPress={handleCreateSingleBid}>
-            <Text style={styles.quickActionText}>Create Single Bid for All Phases</Text>
-          </TouchableOpacity>
+        <View style={styles.projectSection}>
+          <View style={styles.projectHeader}>
+            <Layers size={24} color={Colors.primary} />
+            <Text style={styles.projectHeaderTitle}>Main Project Details</Text>
+          </View>
+          
+          <View style={styles.formCard}>
+            <Text style={styles.inputLabel}>Project Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder={`e.g., ${template?.name} at [Location]`}
+              placeholderTextColor={Colors.textTertiary}
+              value={projectName}
+              onChangeText={setProjectName}
+            />
+
+            <Text style={styles.inputLabel}>Overall Project Due Date</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="2026-12-31"
+              placeholderTextColor={Colors.textTertiary}
+              value={projectDueDate}
+              onChangeText={setProjectDueDate}
+            />
+          </View>
         </View>
 
-        {bidGroups.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Bid Groups ({bidGroups.length})</Text>
-            {bidGroups.map((group) => {
-              const isExpanded = expandedGroup === group.id;
-              const groupPhases = group.phases
-                .map(phaseId => template.phases.find(p => p.id === phaseId))
-                .filter(Boolean);
-              
-              const groupCostEstimate = groupPhases.reduce(
-                (acc, phase) => ({
-                  min: acc.min + (phase?.estimatedCost.min || 0),
-                  max: acc.max + (phase?.estimatedCost.max || 0),
-                }),
-                { min: 0, max: 0 }
-              );
-
-              return (
-                <View key={group.id} style={styles.groupCard}>
-                  <TouchableOpacity
-                    style={styles.groupHeader}
-                    onPress={() => setExpandedGroup(isExpanded ? null : group.id)}
-                  >
-                    <View style={styles.groupHeaderContent}>
-                      <Text style={styles.groupName}>{group.name}</Text>
-                      <Text style={styles.groupPhaseCount}>
-                        {group.phases.length} phase{group.phases.length > 1 ? "s" : ""}
-                      </Text>
-                      <View style={styles.estimateTag}>
-                        <TrendingUp size={14} color={Colors.success} />
-                        <Text style={styles.estimateText}>
-                          Est: ${groupCostEstimate.min.toLocaleString()} - ${groupCostEstimate.max.toLocaleString()}
-                        </Text>
-                      </View>
-                    </View>
-                    {isExpanded ? (
-                      <ChevronUp size={20} color={Colors.textSecondary} />
-                    ) : (
-                      <ChevronDown size={20} color={Colors.textSecondary} />
-                    )}
-                  </TouchableOpacity>
-
-                  {isExpanded && (
-                    <View style={styles.groupContent}>
-                      <View style={styles.groupDetail}>
-                        <DollarSign size={16} color={Colors.textSecondary} />
-                        <Text style={styles.groupDetailText}>{group.budget}</Text>
-                      </View>
-                      <View style={styles.groupDetail}>
-                        <Calendar size={16} color={Colors.textSecondary} />
-                        <Text style={styles.groupDetailText}>{group.dueDate}</Text>
-                      </View>
-                      {group.description && (
-                        <Text style={styles.groupDescription}>{group.description}</Text>
-                      )}
-
-                      <View style={styles.phasesInGroup}>
-                        {groupPhases.map((phase) => (
-                          <View key={phase?.id} style={styles.phaseTag}>
-                            <Text style={styles.phaseTagText}>{phase?.name}</Text>
-                          </View>
-                        ))}
-                      </View>
-
-                      <TouchableOpacity
-                        style={styles.removeButton}
-                        onPress={() => handleRemoveGroup(group.id)}
-                      >
-                        <Text style={styles.removeButtonText}>Remove Group</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Individual Phase Bids ({phaseBids.length})</Text>
+            <View style={styles.quickActions}>
+              <TouchableOpacity style={styles.quickBtn} onPress={applyBudgetToAll}>
+                <Text style={styles.quickBtnText}>Copy Budget</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.quickBtn} onPress={applyDueDateToAll}>
+                <Text style={styles.quickBtnText}>Copy Date</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        )}
 
-        {bidGroups.length > 0 && (() => {
-          const totalEstimate = bidGroups.reduce((acc, group) => {
-            const groupPhases = group.phases
-              .map(phaseId => template.phases.find(p => p.id === phaseId))
-              .filter(Boolean);
+          {phaseBids.map((phaseBid, index) => {
+            const isExpanded = expandedPhase === phaseBid.phaseId;
+            const phase = template?.phases.find(p => p.id === phaseBid.phaseId);
+            const isComplete = phaseBid.budget.trim() && phaseBid.dueDate.trim();
+
+            return (
+              <View key={phaseBid.phaseId} style={styles.phaseCard}>
+                <TouchableOpacity
+                  style={styles.phaseCardHeader}
+                  onPress={() => setExpandedPhase(isExpanded ? null : phaseBid.phaseId)}
+                >
+                  <View style={styles.phaseHeaderLeft}>
+                    <View style={styles.phaseNumber}>
+                      <Text style={styles.phaseNumberText}>{index + 1}</Text>
+                    </View>
+                    <View style={styles.phaseHeaderContent}>
+                      <Text style={styles.phaseName}>{phaseBid.phaseName}</Text>
+                      <View style={styles.phaseMetaRow}>
+                        <View style={styles.estimateTag}>
+                          <TrendingUp size={12} color={Colors.success} />
+                          <Text style={styles.estimateText}>
+                            ${phase?.estimatedCost.min.toLocaleString()} - ${phase?.estimatedCost.max.toLocaleString()}
+                          </Text>
+                        </View>
+                        {isComplete && (
+                          <View style={styles.completeTag}>
+                            <CheckSquare size={12} color={Colors.success} />
+                            <Text style={styles.completeText}>Ready</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                  {isExpanded ? (
+                    <ChevronUp size={20} color={Colors.textSecondary} />
+                  ) : (
+                    <ChevronDown size={20} color={Colors.textSecondary} />
+                  )}
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <View style={styles.phaseCardContent}>
+                    <Text style={styles.phaseDescription}>{phaseBid.description}</Text>
+                    
+                    <View style={styles.phaseInfo}>
+                      <Text style={styles.phaseInfoLabel}>Duration:</Text>
+                      <Text style={styles.phaseInfoValue}>{phase?.estimatedDuration}</Text>
+                    </View>
+                    
+                    <View style={styles.phaseInfo}>
+                      <Text style={styles.phaseInfoLabel}>Trades:</Text>
+                      <Text style={styles.phaseInfoValue}>{phase?.trades.join(", ")}</Text>
+                    </View>
+
+                    <View style={styles.inputRow}>
+                      <View style={styles.inputColumn}>
+                        <Text style={styles.inputLabel}>Budget</Text>
+                        <TextInput
+                          style={[styles.input, !phaseBid.budget && styles.inputIncomplete]}
+                          placeholder="$50,000"
+                          placeholderTextColor={Colors.textTertiary}
+                          value={phaseBid.budget}
+                          onChangeText={(text) => updatePhaseBid(phaseBid.phaseId, "budget", text)}
+                        />
+                      </View>
+
+                      <View style={styles.inputColumn}>
+                        <Text style={styles.inputLabel}>Due Date</Text>
+                        <TextInput
+                          style={[styles.input, !phaseBid.dueDate && styles.inputIncomplete]}
+                          placeholder="2026-03-15"
+                          placeholderTextColor={Colors.textTertiary}
+                          value={phaseBid.dueDate}
+                          onChangeText={(text) => updatePhaseBid(phaseBid.phaseId, "dueDate", text)}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+        </View>
+
+        {phaseBids.length > 0 && (() => {
+          const totalEstimate = phaseBids.reduce((acc, phaseBid) => {
+            const phase = template?.phases.find(p => p.id === phaseBid.phaseId);
             return {
-              min: acc.min + groupPhases.reduce((sum, p) => sum + (p?.estimatedCost.min || 0), 0),
-              max: acc.max + groupPhases.reduce((sum, p) => sum + (p?.estimatedCost.max || 0), 0),
+              min: acc.min + (phase?.estimatedCost.min || 0),
+              max: acc.max + (phase?.estimatedCost.max || 0),
             };
           }, { min: 0, max: 0 });
 
@@ -325,143 +330,30 @@ export default function TemplateBidSetupScreen() {
               <View style={styles.estimateDisclaimer}>
                 <Info size={14} color={Colors.warning} />
                 <Text style={styles.estimateDisclaimerText}>
-                  Market estimate based on selected phases. Actual contractor bids may vary. This pricing is for your planning only.
+                  Market estimate based on selected phases. Actual contractor bids may vary. This pricing is for your planning only and won&apos;t be visible to contractors.
                 </Text>
               </View>
             </View>
           );
         })()}
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Create New Bid Group</Text>
 
-          <View style={styles.formCard}>
-            <Text style={styles.inputLabel}>Group Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g., Foundation & Framing, Interior Finishes"
-              placeholderTextColor={Colors.textTertiary}
-              value={newGroup.name}
-              onChangeText={(text) => setNewGroup({ ...newGroup, name: text })}
-            />
-
-            <Text style={styles.inputLabel}>Select Phases</Text>
-            {newGroup.selectedPhases.length > 0 && (() => {
-              const newGroupPhases = newGroup.selectedPhases
-                .map(phaseId => selectedPhases.find(p => p.id === phaseId))
-                .filter(Boolean);
-              const newGroupEstimate = newGroupPhases.reduce(
-                (acc, phase) => ({
-                  min: acc.min + (phase?.estimatedCost.min || 0),
-                  max: acc.max + (phase?.estimatedCost.max || 0),
-                }),
-                { min: 0, max: 0 }
-              );
-              return (
-                <View style={styles.newGroupEstimate}>
-                  <TrendingUp size={16} color={Colors.success} />
-                  <Text style={styles.newGroupEstimateText}>
-                    Estimated: ${newGroupEstimate.min.toLocaleString()} - ${newGroupEstimate.max.toLocaleString()}
-                  </Text>
-                </View>
-              );
-            })()}
-            <View style={styles.phaseSelectionList}>
-              {selectedPhases.map((phase: TemplatePhase) => {
-                const isSelected = newGroup.selectedPhases.includes(phase.id);
-                const alreadyInGroup = bidGroups.some(g => g.phases.includes(phase.id));
-
-                return (
-                  <TouchableOpacity
-                    key={phase.id}
-                    style={[
-                      styles.phaseSelectionItem,
-                      isSelected && styles.phaseSelectionItemSelected,
-                      alreadyInGroup && styles.phaseSelectionItemDisabled,
-                    ]}
-                    onPress={() => !alreadyInGroup && handleTogglePhaseInGroup(phase.id)}
-                    disabled={alreadyInGroup}
-                  >
-                    {isSelected ? (
-                      <CheckSquare size={20} color={Colors.primary} />
-                    ) : (
-                      <Square size={20} color={alreadyInGroup ? Colors.textTertiary : Colors.border} />
-                    )}
-                    <Text
-                      style={[
-                        styles.phaseSelectionName,
-                        alreadyInGroup && styles.phaseSelectionNameDisabled,
-                      ]}
-                    >
-                      {phase.name}
-                    </Text>
-                    {alreadyInGroup && (
-                      <Text style={styles.assignedTag}>Assigned</Text>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.inputRow}>
-              <View style={styles.inputColumn}>
-                <Text style={styles.inputLabel}>Budget</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="$50,000"
-                  placeholderTextColor={Colors.textTertiary}
-                  value={newGroup.budget}
-                  onChangeText={(text) => setNewGroup({ ...newGroup, budget: text })}
-                  keyboardType="default"
-                />
-              </View>
-
-              <View style={styles.inputColumn}>
-                <Text style={styles.inputLabel}>Due Date</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="2025-01-15"
-                  placeholderTextColor={Colors.textTertiary}
-                  value={newGroup.dueDate}
-                  onChangeText={(text) => setNewGroup({ ...newGroup, dueDate: text })}
-                />
-              </View>
-            </View>
-
-            <Text style={styles.inputLabel}>Description (Optional)</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Describe requirements for this group..."
-              placeholderTextColor={Colors.textTertiary}
-              value={newGroup.description}
-              onChangeText={(text) => setNewGroup({ ...newGroup, description: text })}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-
-            <TouchableOpacity style={styles.addGroupButton} onPress={handleAddGroup}>
-              <Users size={20} color={Colors.white} />
-              <Text style={styles.addGroupButtonText}>Add Bid Group</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         <TouchableOpacity
-          style={[styles.postButton, (posting || bidGroups.length === 0) && styles.postButtonDisabled]}
+          style={[styles.postButton, posting && styles.postButtonDisabled]}
           onPress={handlePostAllBids}
-          disabled={posting || bidGroups.length === 0}
+          disabled={posting}
         >
           {posting ? (
             <>
               <Loader size={20} color={Colors.white} />
-              <Text style={styles.postButtonText}>Posting Bids...</Text>
+              <Text style={styles.postButtonText}>Creating Bids...</Text>
             </>
           ) : (
             <>
               <Send size={20} color={Colors.white} />
               <Text style={styles.postButtonText}>
-                Post {bidGroups.length} Bid{bidGroups.length !== 1 ? "s" : ""}
+                Post {phaseBids.length} Individual Phase Bid{phaseBids.length !== 1 ? "s" : ""}
               </Text>
             </>
           )}
@@ -779,5 +671,126 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600" as const,
     color: Colors.success,
+  },
+  projectSection: {
+    marginBottom: 24,
+  },
+  projectHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    marginBottom: 16,
+  },
+  projectHeaderTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: Colors.text,
+  },
+  sectionHeader: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    marginBottom: 16,
+  },
+  quickBtn: {
+    backgroundColor: Colors.primary + "15",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  quickBtnText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.primary,
+  },
+  phaseCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: 12,
+    overflow: "hidden" as const,
+  },
+  phaseCardHeader: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    padding: 16,
+  },
+  phaseHeaderLeft: {
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+  },
+  phaseNumber: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary + "20",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  },
+  phaseNumberText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: Colors.primary,
+  },
+  phaseHeaderContent: {
+    flex: 1,
+    gap: 6,
+  },
+  phaseName: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: Colors.text,
+  },
+  phaseMetaRow: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 8,
+    alignItems: "center" as const,
+  },
+  completeTag: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: Colors.success + "15",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  completeText: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: Colors.success,
+  },
+  phaseCardContent: {
+    padding: 16,
+    paddingTop: 0,
+    gap: 12,
+  },
+  phaseDescription: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  phaseInfo: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  phaseInfoLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: Colors.textSecondary,
+  },
+  phaseInfoValue: {
+    fontSize: 13,
+    color: Colors.text,
+  },
+  inputIncomplete: {
+    borderColor: Colors.warning,
+    borderWidth: 2,
   },
 });
